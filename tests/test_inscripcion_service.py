@@ -98,6 +98,16 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_el_dni_del_participante_no_es_valido(self):
+        # Arrange: el DNI tiene la longitud correcta pero incluye una letra
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni="3011122A")],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
