@@ -20,10 +20,12 @@ class InscripcionService:
         repositorio_cupos: RepositorioCuposEnMemoria,
         repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
         servicio_email: ServicioEmail,
+        generador_qr,
     ) -> None:
         self._repositorio_cupos = repositorio_cupos
         self._repositorio_inscripciones = repositorio_inscripciones
         self._servicio_email = servicio_email
+        self._generador_qr = generador_qr
 
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
@@ -39,7 +41,8 @@ class InscripcionService:
         self._validar_datos_participantes(participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
-        self._servicio_email.enviar_confirmacion(destinatario=datos["email"])
+        qr = self._generador_qr.generar(f"{actividad_id} {horario} {datos['email']}")
+        self._servicio_email.enviar_confirmacion(destinatario=datos["email"], qr=qr)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
