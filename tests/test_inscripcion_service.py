@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock
 
 from app.dominio.errores import (
     DatosInvalidosError,
@@ -23,7 +24,10 @@ class TestInscripcionService(unittest.TestCase):
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
-        self.servicio = InscripcionService(self.repositorio, self.repositorio_inscripciones)
+        self.servicio_email = MagicMock()
+        self.servicio = InscripcionService(
+            self.repositorio, self.repositorio_inscripciones, self.servicio_email
+        )
 
     def _participante_valido(self, **cambios):
         participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
@@ -35,6 +39,7 @@ class TestInscripcionService(unittest.TestCase):
             "acepta_terminos": True,
             "actividad_id": "tirolesa",
             "horario": "10:00",
+            "email": "visitante@correo.com",
             "cantidad_personas": 2,
             "participantes": [
                 self._participante_valido(),
@@ -176,6 +181,18 @@ class TestInscripcionService(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.repositorio.obtener_cupo("tirolesa", "10:00"), 0)
+
+
+    def test_debe_enviar_el_email_de_confirmacion_al_visitante_al_inscribirse(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        destinatario = self.servicio_email.enviar_confirmacion.call_args.kwargs["destinatario"]
+        self.assertEqual(destinatario, "visitante@correo.com")
 
 
 if __name__ == "__main__":
