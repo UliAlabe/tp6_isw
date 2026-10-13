@@ -25,15 +25,16 @@ class InscripcionService:
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
         horario = datos["horario"]
+        cantidad_personas = datos["cantidad_personas"]
         participantes = datos["participantes"]
 
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
-        self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
+        self._validar_cupo(actividad_id, horario, cantidad_personas)
+        self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(participantes)
-        self._validar_cantidad_personas(datos["cantidad_personas"], participantes)
-        self._repositorio_cupos.descontar_cupo(actividad_id, horario, len(participantes))
+        self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
@@ -57,10 +58,10 @@ class InscripcionService:
         if not all(tiene_datos_validos(p) for p in participantes):
             raise DatosInvalidosError()
 
-    def _validar_cantidad_personas(
+    def _validar_cantidad_participantes(
         self, cantidad_personas: int, participantes: list[dict]
     ) -> None:
         if cantidad_personas != len(participantes):
             raise DatosInvalidosError(
-                "La cantidad de personas no coincide con los participantes ingresados"
+                "La cantidad de personas no coincide con los participantes cargados"
             )
