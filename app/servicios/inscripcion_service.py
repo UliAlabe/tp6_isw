@@ -11,6 +11,7 @@ from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemo
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
 )
+from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
 
 
@@ -20,7 +21,7 @@ class InscripcionService:
         repositorio_cupos: RepositorioCuposEnMemoria,
         repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
         servicio_email: ServicioEmail,
-        generador_qr,
+        generador_qr: GeneradorQr,
     ) -> None:
         self._repositorio_cupos = repositorio_cupos
         self._repositorio_inscripciones = repositorio_inscripciones
@@ -41,8 +42,11 @@ class InscripcionService:
         self._validar_datos_participantes(participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
-        qr = self._generador_qr.generar(f"{actividad_id} {horario} {datos['email']}")
-        self._servicio_email.enviar_confirmacion(destinatario=datos["email"], qr=qr)
+        self._enviar_confirmacion(actividad_id, horario, datos["email"])
+
+    def _enviar_confirmacion(self, actividad_id: str, horario: str, email: str) -> None:
+        qr = self._generador_qr.generar(f"{actividad_id} {horario} {email}")
+        self._servicio_email.enviar_confirmacion(destinatario=email, qr=qr)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
