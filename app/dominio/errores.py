@@ -1,0 +1,2 @@
+class TerminosNoAceptadosError(Exception):
+    pass
