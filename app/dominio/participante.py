@@ -15,7 +15,7 @@ def tiene_dni_valido(participante: dict) -> bool:
 
 
 def tiene_edad_valida(participante: dict) -> bool:
-    return participante.get("edad", 0) > 0
+    return 0 < participante.get("edad", 0) < 120
 
 
 def tiene_datos_validos(participante: dict) -> bool:
