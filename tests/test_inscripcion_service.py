@@ -130,6 +130,17 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
-            
+
+    def test_debe_rechazar_la_inscripcion_cuando_la_edad_supera_el_maximo(self):
+        # Arrange: la edad es positiva pero supera el máximo permitido
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=150)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
