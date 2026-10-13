@@ -21,6 +21,11 @@ class TestInscripcionService(unittest.TestCase):
         )
         self.servicio = InscripcionService(self.repositorio)
 
+    def _participante_valido(self, **cambios):
+        participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
+        participante.update(cambios)
+        return participante
+
     def _datos_validos(self, **cambios):
         datos = {
             "acepta_terminos": True,
@@ -28,8 +33,8 @@ class TestInscripcionService(unittest.TestCase):
             "horario": "10:00",
             "cantidad_personas": 2,
             "participantes": [
-                {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"},
-                {"nombre": "Luis Gómez", "dni": "28555666", "edad": 31, "talle": "L"},
+                self._participante_valido(),
+                self._participante_valido(nombre="Luis Gómez", dni="28555666", edad=31, talle="L"),
             ],
         }
         datos.update(cambios)
@@ -61,24 +66,22 @@ class TestInscripcionService(unittest.TestCase):
 
     def test_debe_rechazar_la_inscripcion_sin_talle_cuando_la_actividad_lo_requiere(self):
         # Arrange: la tirolesa exige talle y la participante no lo informa
-        participante_sin_talle = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28}
         datos = self._datos_validos(
             cantidad_personas=1,
-            participantes=[participante_sin_talle],
+            participantes=[self._participante_valido(talle=None)],
         )
 
         # Act y Assert
         with self.assertRaises(TalleRequeridoError):
             self.servicio.inscribir(datos)
-    
+
     def test_debe_aceptar_la_inscripcion_sin_talle_cuando_la_actividad_no_lo_requiere(self):
         # Arrange: el safari no exige talle y la participante no lo informa
-        participante_sin_talle = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28}
         datos = self._datos_validos(
             actividad_id="safari",
             horario="11:00",
             cantidad_personas=1,
-            participantes=[participante_sin_talle],
+            participantes=[self._participante_valido(talle=None)],
         )
 
         # Act: no debe levantar ningún error
@@ -86,15 +89,15 @@ class TestInscripcionService(unittest.TestCase):
 
     def test_debe_rechazar_la_inscripcion_cuando_el_nombre_del_participante_esta_vacio(self):
         # Arrange: todos los datos son válidos salvo el nombre
-        participante_sin_nombre = {"nombre": "", "dni": "30111222", "edad": 28, "talle": "M"}
         datos = self._datos_validos(
             cantidad_personas=1,
-            participantes=[participante_sin_nombre],
+            participantes=[self._participante_valido(nombre="")],
         )
 
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
+
 
 if __name__ == "__main__":
     unittest.main()
