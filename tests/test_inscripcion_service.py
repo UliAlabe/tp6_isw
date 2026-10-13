@@ -142,5 +142,16 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_la_cantidad_no_coincide_con_los_participantes(self):
+        # Arrange: se declaran 2 personas pero se carga solo 1 participante
+        datos = self._datos_validos(
+            cantidad_personas=2,
+            participantes=[self._participante_valido()],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
