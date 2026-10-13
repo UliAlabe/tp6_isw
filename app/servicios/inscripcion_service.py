@@ -11,6 +11,7 @@ from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemo
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
 )
+from app.servicios.servicio_email import ServicioEmail
 
 
 class InscripcionService:
@@ -18,7 +19,7 @@ class InscripcionService:
         self,
         repositorio_cupos: RepositorioCuposEnMemoria,
         repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
-        servicio_email,
+        servicio_email: ServicioEmail,
     ) -> None:
         self._repositorio_cupos = repositorio_cupos
         self._repositorio_inscripciones = repositorio_inscripciones
