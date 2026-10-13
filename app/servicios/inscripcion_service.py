@@ -6,7 +6,7 @@ from app.dominio.errores import (
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
-from app.dominio.participante import tiene_nombre, tiene_talle
+from app.dominio.participante import tiene_dni_valido, tiene_nombre, tiene_talle
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 
 
@@ -43,5 +43,5 @@ class InscripcionService:
             raise TalleRequeridoError()
 
     def _validar_datos_participantes(self, participantes: list[dict]) -> None:
-        if not all(tiene_nombre(p) for p in participantes):
+        if not all(tiene_nombre(p) and tiene_dni_valido(p) for p in participantes):
             raise DatosInvalidosError()
