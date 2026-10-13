@@ -24,7 +24,9 @@ class InscripcionService:
         self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(participantes)
-        
+        if datos["cantidad_personas"] != len(participantes):
+            raise DatosInvalidosError()
+
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
             raise TerminosNoAceptadosError()
