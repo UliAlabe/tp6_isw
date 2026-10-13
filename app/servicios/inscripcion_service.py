@@ -18,9 +18,11 @@ class InscripcionService:
         self,
         repositorio_cupos: RepositorioCuposEnMemoria,
         repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
+        servicio_email,
     ) -> None:
         self._repositorio_cupos = repositorio_cupos
         self._repositorio_inscripciones = repositorio_inscripciones
+        self._servicio_email = servicio_email
 
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
@@ -36,6 +38,7 @@ class InscripcionService:
         self._validar_datos_participantes(participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
+        self._servicio_email.enviar_confirmacion(destinatario=datos["email"])
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
