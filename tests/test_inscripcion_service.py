@@ -8,6 +8,9 @@ from app.dominio.errores import (
     TerminosNoAceptadosError,
 )
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
+from app.repositorios.repositorio_inscripciones_en_memoria import (
+    RepositorioInscripcionesEnMemoria,
+)
 from app.servicios.inscripcion_service import InscripcionService
 
 
@@ -19,7 +22,8 @@ class TestInscripcionService(unittest.TestCase):
                 ("safari", "11:00"): 5,
             }
         )
-        self.servicio = InscripcionService(self.repositorio)
+        self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
+        self.servicio = InscripcionService(self.repositorio, self.repositorio_inscripciones)
 
     def _participante_valido(self, **cambios):
         participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
@@ -152,6 +156,17 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
+
+    def test_debe_registrar_la_inscripcion_cuando_los_datos_son_validos(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
