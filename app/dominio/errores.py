@@ -16,3 +16,8 @@ class HorarioNoDisponibleError(Exception):
 class TalleRequeridoError(Exception):
     def __init__(self) -> None:
         super().__init__("La actividad requiere informar el talle de cada participante")
+
+
+class DatosInvalidosError(Exception):
+    def __init__(self, motivo: str = "Los datos de los participantes no son válidos") -> None:
+        super().__init__(motivo)

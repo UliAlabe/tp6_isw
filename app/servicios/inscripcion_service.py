@@ -1,12 +1,13 @@
 from app.dominio.catalogo_actividades import requiere_talle
 from app.dominio.errores import (
+    DatosInvalidosError,
     HorarioNoDisponibleError,
     SinCupoError,
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
+from app.dominio.participante import tiene_nombre, tiene_talle
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
-from app.dominio.participante import tiene_talle
 
 
 class InscripcionService:
@@ -21,6 +22,7 @@ class InscripcionService:
         self._validar_horario(actividad_id, horario)
         self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
         self._validar_talle(actividad_id, datos["participantes"])
+        self._validar_datos_participantes(datos["participantes"])
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
@@ -38,3 +40,7 @@ class InscripcionService:
     def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
         if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
+
+    def _validar_datos_participantes(self, participantes: list[dict]) -> None:
+        if not all(tiene_nombre(p) for p in participantes):
+            raise DatosInvalidosError()
