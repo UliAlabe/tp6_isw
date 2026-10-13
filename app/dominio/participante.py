@@ -1,4 +1,6 @@
 LONGITUDES_DNI_VALIDAS = (7, 8)
+EDAD_MINIMA = 1
+EDAD_MAXIMA = 120
 
 
 def tiene_talle(participante: dict) -> bool:
@@ -15,7 +17,7 @@ def tiene_dni_valido(participante: dict) -> bool:
 
 
 def tiene_edad_valida(participante: dict) -> bool:
-    return 0 < participante.get("edad", 0) < 120
+    return EDAD_MINIMA <= participante.get("edad", 0) <= EDAD_MAXIMA
 
 
 def tiene_datos_validos(participante: dict) -> bool:
