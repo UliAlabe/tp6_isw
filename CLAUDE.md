@@ -14,7 +14,7 @@
 |-------|-----------|
 | Lenguaje del backend | Python 3.12 (con type hints) |
 | Backend | FastAPI + Uvicorn |
-| **Tests unitarios** | **pytest** |
+| Tests unitarios | unittest |
 | Tests de endpoints | `TestClient` de FastAPI (requiere `httpx`) |
 | Mocks | `unittest.mock` (viene con Python) |
 | Email | `smtplib` (Mailtrap en desarrollo) |
@@ -22,7 +22,6 @@
 | Persistencia | En memoria (listas y diccionarios), sin base de datos |
 | Frontend | React |
 | Estilos | Tailwind CSS |
-| Estilo y formato | `ruff` (lint y formato) |
 
 No agregar librerías fuera de esta lista sin consultar. Las dependencias del backend van en `requirements.txt` y se instalan dentro de un entorno virtual (`venv`).
 
@@ -59,7 +58,7 @@ No agregar librerías fuera de esta lista sin consultar. Las dependencias del ba
 
 ## 5. Frontend
 
-- **Mobile-first:** se diseña primero para celular y se amplía a pantallas grandes con los prefijos de Tailwind (`sm:`, `md:`, `lg:`).
+- **Mobile-first:** se diseña primero para celular.
 - **Sin reglas de negocio:** el frontend no decide si hay cupo, solo muestra lo que responde el backend.
 - Mensajes de error claros ("Ese horario ya no tiene cupo, elegí otro").
 
