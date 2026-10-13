@@ -1,6 +1,7 @@
 import unittest
 
 from app.dominio.errores import (
+    DatosInvalidosError,
     HorarioNoDisponibleError,
     SinCupoError,
     TalleRequeridoError,
@@ -83,6 +84,17 @@ class TestInscripcionService(unittest.TestCase):
         # Act: no debe levantar ningún error
         self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_el_nombre_del_participante_esta_vacio(self):
+        # Arrange: todos los datos son válidos salvo el nombre
+        participante_sin_nombre = {"nombre": "", "dni": "30111222", "edad": 28, "talle": "M"}
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[participante_sin_nombre],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
