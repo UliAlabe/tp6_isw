@@ -35,6 +35,6 @@ class InscripcionService:
         if cantidad_personas > cupo:
             raise SinCupoError()
 
-    def _validar_talle(self, actividad_id: str, participantes: list) -> None:
+    def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
         if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
