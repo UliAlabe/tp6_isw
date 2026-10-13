@@ -12,7 +12,12 @@ from app.servicios.inscripcion_service import InscripcionService
 
 class TestInscripcionService(unittest.TestCase):
     def setUp(self):
-        self.repositorio = RepositorioCuposEnMemoria({("tirolesa", "10:00"): 2})
+        self.repositorio = RepositorioCuposEnMemoria(
+            {
+                ("tirolesa", "10:00"): 2,
+                ("safari", "11:00"): 5,
+            }
+        )
         self.servicio = InscripcionService(self.repositorio)
 
     def _datos_validos(self, **cambios):
@@ -64,6 +69,19 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(TalleRequeridoError):
             self.servicio.inscribir(datos)
+    
+    def test_debe_aceptar_la_inscripcion_sin_talle_cuando_la_actividad_no_lo_requiere(self):
+        # Arrange: el safari no exige talle y la participante no lo informa
+        participante_sin_talle = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28}
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[participante_sin_talle],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
 
 
 if __name__ == "__main__":
