@@ -11,19 +11,22 @@ class InscripcionService:
         self._repositorio_cupos = repositorio_cupos
 
     def inscribir(self, datos: dict) -> None:
-        self._validar_terminos(datos)
-        self._validar_horario(datos)
-        self._validar_cupo(datos)
+        actividad_id = datos["actividad_id"]
+        horario = datos["horario"]
 
-    def _validar_terminos(self, datos: dict) -> None:
-        if not datos["acepta_terminos"]:
+        self._validar_terminos(datos["acepta_terminos"])
+        self._validar_horario(actividad_id, horario)
+        self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
+
+    def _validar_terminos(self, acepta_terminos: bool) -> None:
+        if not acepta_terminos:
             raise TerminosNoAceptadosError()
 
-    def _validar_horario(self, datos: dict) -> None:
-        if not self._repositorio_cupos.existe_horario(datos["actividad_id"], datos["horario"]):
+    def _validar_horario(self, actividad_id: str, horario: str) -> None:
+        if not self._repositorio_cupos.existe_horario(actividad_id, horario):
             raise HorarioNoDisponibleError()
 
-    def _validar_cupo(self, datos: dict) -> None:
-        cupo = self._repositorio_cupos.obtener_cupo(datos["actividad_id"], datos["horario"])
-        if datos["cantidad_personas"] > cupo:
+    def _validar_cupo(self, actividad_id: str, horario: str, cantidad_personas: int) -> None:
+        cupo = self._repositorio_cupos.obtener_cupo(actividad_id, horario)
+        if cantidad_personas > cupo:
             raise SinCupoError()
