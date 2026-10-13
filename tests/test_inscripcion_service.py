@@ -167,6 +167,16 @@ class TestInscripcionService(unittest.TestCase):
         # Assert
         self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
 
+    def test_debe_descontar_el_cupo_del_horario_al_inscribirse(self):
+        # Arrange: la tirolesa de las 10:00 tiene 2 lugares y se inscriben 2 personas
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(self.repositorio.obtener_cupo("tirolesa", "10:00"), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
