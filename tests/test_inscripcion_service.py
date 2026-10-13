@@ -1,6 +1,10 @@
 import unittest
 
-from app.dominio.errores import SinCupoError, TerminosNoAceptadosError
+from app.dominio.errores import (
+    HorarioNoDisponibleError,
+    SinCupoError,
+    TerminosNoAceptadosError,
+)
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.servicios.inscripcion_service import InscripcionService
 
@@ -34,6 +38,14 @@ class TestInscripcionService(unittest.TestCase):
 
         # Act y Assert
         with self.assertRaises(SinCupoError):
+            self.servicio.inscribir(datos)
+    
+    def test_debe_rechazar_la_inscripcion_cuando_el_horario_no_esta_disponible(self):
+        # Arrange: a las 22:00 el parque está cerrado
+        datos = self._datos_validos(horario="22:00")
+
+        # Act y Assert
+        with self.assertRaises(HorarioNoDisponibleError):
             self.servicio.inscribir(datos)
 
 
