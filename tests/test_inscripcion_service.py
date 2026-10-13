@@ -6,29 +6,35 @@ from app.servicios.inscripcion_service import InscripcionService
 
 
 class TestInscripcionService(unittest.TestCase):
-    def test_debe_rechazar_la_inscripcion_sin_aceptar_terminos(self):
-        # Arrange
-        servicio = InscripcionService()
-        datos = {"acepta_terminos": False}
+    def setUp(self):
+        self.repositorio = RepositorioCuposEnMemoria({("tirolesa", "10:00"): 2})
+        self.servicio = InscripcionService(self.repositorio)
 
-        # Act y Assert
-        with self.assertRaises(TerminosNoAceptadosError):
-            servicio.inscribir(datos)
-
-    def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario(self):
-        # Arrange: la tirolesa de las 10:00 tiene 2 lugares y se piden 3
-        repositorio = RepositorioCuposEnMemoria({("tirolesa", "10:00"): 2})
-        servicio = InscripcionService(repositorio)
+    def _datos_validos(self, **cambios):
         datos = {
             "acepta_terminos": True,
             "actividad_id": "tirolesa",
             "horario": "10:00",
-            "cantidad_personas": 3,
+            "cantidad_personas": 2,
         }
+        datos.update(cambios)
+        return datos
+
+    def test_debe_rechazar_la_inscripcion_sin_aceptar_terminos(self):
+        # Arrange
+        datos = self._datos_validos(acepta_terminos=False)
+
+        # Act y Assert
+        with self.assertRaises(TerminosNoAceptadosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario(self):
+        # Arrange: hay 2 lugares y se piden 3
+        datos = self._datos_validos(cantidad_personas=3)
 
         # Act y Assert
         with self.assertRaises(SinCupoError):
-            servicio.inscribir(datos)
+            self.servicio.inscribir(datos)
 
 
 if __name__ == "__main__":
