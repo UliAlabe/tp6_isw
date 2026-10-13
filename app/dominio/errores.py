@@ -11,3 +11,8 @@ class SinCupoError(Exception):
 class HorarioNoDisponibleError(Exception):
     def __init__(self) -> None:
         super().__init__("El horario seleccionado no está disponible para la actividad")
+
+
+class TalleRequeridoError(Exception):
+    def __init__(self) -> None:
+        super().__init__("La actividad requiere informar el talle de cada participante")

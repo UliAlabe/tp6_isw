@@ -1,6 +1,8 @@
+from app.dominio.catalogo_actividades import requiere_talle
 from app.dominio.errores import (
     HorarioNoDisponibleError,
     SinCupoError,
+    TalleRequeridoError,
     TerminosNoAceptadosError,
 )
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
@@ -17,6 +19,7 @@ class InscripcionService:
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
         self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
+        self._validar_talle(actividad_id, datos["participantes"])
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
@@ -30,3 +33,10 @@ class InscripcionService:
         cupo = self._repositorio_cupos.obtener_cupo(actividad_id, horario)
         if cantidad_personas > cupo:
             raise SinCupoError()
+
+    def _validar_talle(self, actividad_id: str, participantes: list) -> None:
+        if not requiere_talle(actividad_id):
+            return
+        for participante in participantes:
+            if not participante.get("talle"):
+                raise TalleRequeridoError()
