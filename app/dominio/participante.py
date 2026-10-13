@@ -14,7 +14,15 @@ def tiene_dni_valido(participante: dict) -> bool:
     return dni.isdigit() and len(dni) in LONGITUDES_DNI_VALIDAS
 
 
+def tiene_edad_valida(participante: dict) -> bool:
+    return participante.get("edad", 0) > 0
+
+
 def tiene_datos_validos(participante: dict) -> bool:
-    return tiene_nombre(participante) and tiene_dni_valido(participante)
+    return (
+        tiene_nombre(participante)
+        and tiene_dni_valido(participante)
+        and tiene_edad_valida(participante)
+    )
 
 
