@@ -7,3 +7,6 @@ class RepositorioCuposEnMemoria:
 
     def obtener_cupo(self, actividad_id: str, horario: str) -> int:
         return self._cupos[(actividad_id, horario)]
+
+    def descontar_cupo(self, actividad_id: str, horario: str, cantidad: int) -> None:
+        self._cupos[(actividad_id, horario)] -= cantidad

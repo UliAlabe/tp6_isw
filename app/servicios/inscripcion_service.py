@@ -33,6 +33,7 @@ class InscripcionService:
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(participantes)
         self._validar_cantidad_personas(datos["cantidad_personas"], participantes)
+        self._repositorio_cupos.descontar_cupo(actividad_id, horario, len(participantes))
         self._repositorio_inscripciones.guardar(datos)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
