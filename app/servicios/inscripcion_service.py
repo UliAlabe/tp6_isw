@@ -6,6 +6,7 @@ from app.dominio.errores import (
     TerminosNoAceptadosError,
 )
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
+from app.dominio.participante import tiene_talle
 
 
 class InscripcionService:
@@ -35,8 +36,5 @@ class InscripcionService:
             raise SinCupoError()
 
     def _validar_talle(self, actividad_id: str, participantes: list) -> None:
-        if not requiere_talle(actividad_id):
-            return
-        for participante in participantes:
-            if not participante.get("talle"):
-                raise TalleRequeridoError()
+        if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
+            raise TalleRequeridoError()
