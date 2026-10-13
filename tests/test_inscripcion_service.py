@@ -25,8 +25,12 @@ class TestInscripcionService(unittest.TestCase):
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
         self.servicio_email = MagicMock()
+        self.generador_qr = MagicMock()
         self.servicio = InscripcionService(
-            self.repositorio, self.repositorio_inscripciones, self.servicio_email
+            self.repositorio,
+            self.repositorio_inscripciones,
+            self.servicio_email,
+            self.generador_qr,
         )
 
     def _participante_valido(self, **cambios):
@@ -193,6 +197,19 @@ class TestInscripcionService(unittest.TestCase):
         # Assert
         destinatario = self.servicio_email.enviar_confirmacion.call_args.kwargs["destinatario"]
         self.assertEqual(destinatario, "visitante@correo.com")
+
+
+    def test_debe_incluir_el_codigo_qr_en_el_email_de_confirmacion(self):
+        # Arrange
+        datos = self._datos_validos()
+        self.generador_qr.generar.return_value = b"imagen-qr"
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        qr_enviado = self.servicio_email.enviar_confirmacion.call_args.kwargs["qr"]
+        self.assertEqual(qr_enviado, b"imagen-qr")
 
 
 if __name__ == "__main__":
