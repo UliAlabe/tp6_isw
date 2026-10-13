@@ -6,3 +6,8 @@ class TerminosNoAceptadosError(Exception):
 class SinCupoError(Exception):
     def __init__(self) -> None:
         super().__init__("No hay cupo disponible para el horario seleccionado")
+
+
+class HorarioNoDisponibleError(Exception):
+    def __init__(self) -> None:
+        super().__init__("El horario seleccionado no está disponible para la actividad")
