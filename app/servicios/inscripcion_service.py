@@ -22,6 +22,7 @@ class InscripcionService:
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
         self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
+        self._validar_cantidad_participantes(datos["cantidad_personas"], participantes)
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(participantes)
         
@@ -45,3 +46,11 @@ class InscripcionService:
     def _validar_datos_participantes(self, participantes: list[dict]) -> None:
         if not all(tiene_datos_validos(p) for p in participantes):
             raise DatosInvalidosError()
+
+    def _validar_cantidad_participantes(
+        self, cantidad_personas: int, participantes: list[dict]
+    ) -> None:
+        if cantidad_personas != len(participantes):
+            raise DatosInvalidosError(
+                "La cantidad de personas no coincide con los participantes cargados"
+            )    
