@@ -8,11 +8,19 @@ from app.dominio.errores import (
 )
 from app.dominio.participante import tiene_datos_validos, tiene_talle
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
+from app.repositorios.repositorio_inscripciones_en_memoria import (
+    RepositorioInscripcionesEnMemoria,
+)
 
 
 class InscripcionService:
-    def __init__(self, repositorio_cupos: RepositorioCuposEnMemoria) -> None:
+    def __init__(
+        self,
+        repositorio_cupos: RepositorioCuposEnMemoria,
+        repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
+    ) -> None:
         self._repositorio_cupos = repositorio_cupos
+        self._repositorio_inscripciones = repositorio_inscripciones
 
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
@@ -25,6 +33,7 @@ class InscripcionService:
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(participantes)
         self._validar_cantidad_personas(datos["cantidad_personas"], participantes)
+        self._repositorio_inscripciones.guardar(datos)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
