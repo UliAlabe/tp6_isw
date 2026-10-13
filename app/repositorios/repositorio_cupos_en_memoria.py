@@ -1,6 +1,6 @@
 class RepositorioCuposEnMemoria:
-    def __init__(self, cupos: dict) -> None:
-        self._cupos = cupos
+    def __init__(self, cupos: dict[tuple[str, str], int]) -> None:
+        self._cupos = dict(cupos)
 
     def existe_horario(self, actividad_id: str, horario: str) -> bool:
         return (actividad_id, horario) in self._cupos
