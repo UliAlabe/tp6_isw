@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock
 
 from app.dominio.errores import (
     DatosInvalidosError,
@@ -8,6 +9,9 @@ from app.dominio.errores import (
     TerminosNoAceptadosError,
 )
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
+from app.repositorios.repositorio_inscripciones_en_memoria import (
+    RepositorioInscripcionesEnMemoria,
+)
 from app.servicios.inscripcion_service import InscripcionService
 
 
@@ -19,7 +23,15 @@ class TestInscripcionService(unittest.TestCase):
                 ("safari", "11:00"): 5,
             }
         )
-        self.servicio = InscripcionService(self.repositorio)
+        self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
+        self.servicio_email = MagicMock()
+        self.generador_qr = MagicMock()
+        self.servicio = InscripcionService(
+            self.repositorio,
+            self.repositorio_inscripciones,
+            self.servicio_email,
+            self.generador_qr,
+        )
 
     def _participante_valido(self, **cambios):
         participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
@@ -31,6 +43,7 @@ class TestInscripcionService(unittest.TestCase):
             "acepta_terminos": True,
             "actividad_id": "tirolesa",
             "horario": "10:00",
+            "email": "visitante@correo.com",
             "cantidad_personas": 2,
             "participantes": [
                 self._participante_valido(),
@@ -152,6 +165,52 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
+
+    def test_debe_registrar_la_inscripcion_cuando_los_datos_son_validos(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
+
+    def test_debe_descontar_el_cupo_del_horario_al_inscribirse(self):
+        # Arrange: la tirolesa de las 10:00 tiene 2 lugares y se inscriben 2 personas
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(self.repositorio.obtener_cupo("tirolesa", "10:00"), 0)
+
+
+    def test_debe_enviar_el_email_de_confirmacion_al_visitante_al_inscribirse(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        destinatario = self.servicio_email.enviar_confirmacion.call_args.kwargs["destinatario"]
+        self.assertEqual(destinatario, "visitante@correo.com")
+
+
+    def test_debe_incluir_el_codigo_qr_en_el_email_de_confirmacion(self):
+        # Arrange
+        datos = self._datos_validos()
+        self.generador_qr.generar.return_value = b"imagen-qr"
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        qr_enviado = self.servicio_email.enviar_confirmacion.call_args.kwargs["qr"]
+        self.assertEqual(qr_enviado, b"imagen-qr")
+
 
 if __name__ == "__main__":
     unittest.main()
