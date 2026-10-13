@@ -1,8 +1,9 @@
 from app.dominio.errores import SinCupoError, TerminosNoAceptadosError
+from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 
 
 class InscripcionService:
-    def __init__(self, repositorio_cupos=None) -> None:
+    def __init__(self, repositorio_cupos: RepositorioCuposEnMemoria) -> None:
         self._repositorio_cupos = repositorio_cupos
 
     def inscribir(self, datos: dict) -> None:
