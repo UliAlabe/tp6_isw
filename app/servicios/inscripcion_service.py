@@ -17,13 +17,14 @@ class InscripcionService:
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
         horario = datos["horario"]
+        participantes = datos["participantes"]
 
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
         self._validar_cupo(actividad_id, horario, datos["cantidad_personas"])
-        self._validar_talle(actividad_id, datos["participantes"])
-        self._validar_datos_participantes(datos["participantes"])
-
+        self._validar_talle(actividad_id, participantes)
+        self._validar_datos_participantes(participantes)
+        
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
             raise TerminosNoAceptadosError()
