@@ -12,8 +12,8 @@ def tiene_nombre(participante: dict) -> bool:
 
 
 def tiene_dni_valido(participante: dict) -> bool:
-    dni = str(participante.get("dni", ""))
-    return dni.isdigit() and len(dni) in LONGITUDES_DNI_VALIDAS
+    dni = participante.get("dni")
+    return isinstance(dni, str) and dni.isdigit() and len(dni) in LONGITUDES_DNI_VALIDAS
 
 
 def tiene_edad_valida(participante: dict, edad_minima: int) -> bool:
