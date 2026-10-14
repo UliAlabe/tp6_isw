@@ -21,6 +21,7 @@ class TestInscripcionService(unittest.TestCase):
             {
                 ("tirolesa", "10:00"): 2,
                 ("safari", "11:00"): 5,
+                ("palestra", "12:00"): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -223,6 +224,18 @@ class TestInscripcionService(unittest.TestCase):
         qr_enviado = self.servicio_email.enviar_confirmacion.call_args.kwargs["qr"]
         self.assertEqual(qr_enviado, b"imagen-qr")
 
+    def test_debe_rechazar_la_inscripcion_de_un_menor_de_12_anios_en_palestra(self):
+        # Arrange: la palestra exige 12 años o más y el participante tiene 10
+        datos = self._datos_validos(
+            actividad_id="palestra",
+            horario="12:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=10)],
+        )
 
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+            
 if __name__ == "__main__":
     unittest.main()
