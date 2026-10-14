@@ -257,6 +257,21 @@ class TestInscripcionService(unittest.TestCase):
 
         # Act: no debe levantar ningún error
         self.servicio.inscribir(datos)         
-           
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_participante_no_informa_la_edad(self):
+        # Arrange: el safari admite todas las edades, pero la edad es un dato obligatorio
+        participante_sin_edad = self._participante_valido(talle=None)
+        del participante_sin_edad["edad"]
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[participante_sin_edad],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
