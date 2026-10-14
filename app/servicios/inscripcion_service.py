@@ -4,6 +4,7 @@ from app.dominio.errores import (
     FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
     SinCupoError,
+    SuperposicionHorariaError,
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
@@ -46,6 +47,7 @@ class InscripcionService:
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(actividad_id, participantes)
+        self._validar_superposicion(horario, participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
         self._enviar_confirmacion(actividad_id, horario, datos["email"])
@@ -92,3 +94,12 @@ class InscripcionService:
         anticipacion = horario - self._reloj.ahora()
         if not esta_dentro_de_la_ventana(anticipacion):
             raise FueraDeVentanaDeInscripcionError()
+
+    def _validar_superposicion(self, horario: datetime, participantes: list[dict]) -> None:
+        dnis_nuevos = {p["dni"] for p in participantes}
+        for inscripcion in self._repositorio_inscripciones.listar():
+            if inscripcion["horario"] != horario:
+                continue
+            dnis_existentes = {p["dni"] for p in inscripcion["participantes"]}
+            if dnis_nuevos & dnis_existentes:
+                raise SuperposicionHorariaError()
