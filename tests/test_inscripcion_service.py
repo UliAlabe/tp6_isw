@@ -137,7 +137,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: todos los datos son válidos salvo la edad
         datos = self._datos_validos(
             cantidad_personas=1,
-            participantes=[self._participante_valido(edad=0)],
+            participantes=[self._participante_valido(edad=-1)],
         )
 
         # Act y Assert
@@ -154,6 +154,18 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
+
+    def test_debe_aceptar_la_inscripcion_de_un_participante_de_cero_anios_en_actividad_para_todas_las_edades(self):
+        # Arrange: el safari admite todas las edades, incluso un bebé
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=0, talle=None)],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
 
     def test_debe_rechazar_la_inscripcion_cuando_la_cantidad_no_coincide_con_los_participantes(self):
         # Arrange: se declaran 2 personas pero se carga solo 1 participante
