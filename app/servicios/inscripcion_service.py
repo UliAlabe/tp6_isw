@@ -14,10 +14,10 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 )
 from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
-from datetime import datetime, timedelta
+from datetime import datetime
 from app.servicios.reloj import Reloj
+from app.dominio.ventana_inscripcion import ANTICIPACION_MAXIMA
 
-ANTICIPACION_MAXIMA = timedelta(hours=24)
 
 class InscripcionService:
     def __init__(
