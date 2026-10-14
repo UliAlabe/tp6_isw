@@ -332,5 +332,13 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(FueraDeVentanaDeInscripcionError):
             self.servicio.inscribir(datos)
 
+    def test_debe_aceptar_la_inscripcion_con_exactamente_15_minutos_de_anticipacion(self):
+        # Arrange: son las 09:45, faltan justo 15 minutos para el turno de las 10:00
+        self.reloj.ahora.return_value = datetime(2026, 10, 14, 9, 45)
+        datos = self._datos_validos()
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
