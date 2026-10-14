@@ -382,5 +382,18 @@ class TestInscripcionService(unittest.TestCase):
         # Act: no debe levantar ningún error
         self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_dos_participantes_tienen_el_mismo_dni(self):
+        # Arrange: dos participantes distintos cargados con el mismo DNI
+        datos = self._datos_validos(
+            participantes=[
+                self._participante_valido(nombre="Ana Pérez", dni="30111222"),
+                self._participante_valido(nombre="Luis Gómez", dni="30111222"),
+            ],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
