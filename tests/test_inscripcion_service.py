@@ -247,6 +247,16 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
-            
+    
+    def test_debe_aceptar_la_inscripcion_de_un_participante_con_la_edad_minima_exacta(self):
+        # Arrange: la tirolesa exige 8 años y el participante tiene justo 8
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=8)],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)         
+           
 if __name__ == "__main__":
     unittest.main()
