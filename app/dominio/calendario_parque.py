@@ -15,6 +15,8 @@ def es_turno_valido(horario: datetime) -> bool:
 
 
 def turnos_del_dia(fecha: date) -> list[datetime]:
+    if not esta_abierto(fecha):
+        return []
     return [
         datetime(fecha.year, fecha.month, fecha.day, hora)
         for hora in range(HORA_PRIMER_TURNO, HORA_ULTIMO_TURNO + 1)
