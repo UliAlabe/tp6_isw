@@ -12,7 +12,7 @@
 
 | Parte | Tecnología |
 |-------|-----------|
-| Lenguaje del backend | Python 3.12 (con type hints) |
+| Lenguaje del backend | Python 3.14 (con type hints) |
 | Backend | FastAPI + Uvicorn |
 | Tests unitarios | unittest |
 | Tests de endpoints | `TestClient` de FastAPI (requiere `httpx`) |
@@ -105,16 +105,16 @@ Los errores siempre tienen el mismo formato:
 - Funciones `test_` con nombres en español que describen el comportamiento:
 
 ```python
-def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario():
+def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario(self):
     # Arrange: preparar datos
     # Act y Assert: ejecutar y verificar
-    with pytest.raises(SinCupoError):
-        servicio.inscribir(datos)
+    with self.assertRaises(SinCupoError):
+        self.servicio.inscribir(datos)
 ```
 
 - Patrón **Arrange / Act / Assert**, una verificación principal por test.
 - Email y QR se reemplazan por `MagicMock`; los repositorios, por versiones en memoria.
-- Los datos de ejemplo repetidos van en `fixtures` de pytest.
+- Los datos de ejemplo repetidos van en setUp. y en métodos auxiliares (_datos_validos, _participante_valido).
 - Los tests no dependen unos de otros.
 
 ## 8. TDD y commits
@@ -137,9 +137,6 @@ refactor(inscripcion): extraer validación de cupo
 ## 9. Comandos
 
 ```bash
-pytest                        # correr tests
-ptw                           # modo TDD (requiere pytest-watch)
-ruff check .                  # revisar estilo
-ruff format .                 # formatear código
-uvicorn app.main:app --reload # levantar backend
+python -m unittest discover -v   # correr tests
+uvicorn app.main:app --reload    # levantar backend
 ```
