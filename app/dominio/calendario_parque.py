@@ -12,3 +12,10 @@ def esta_abierto(fecha: date) -> bool:
 
 def es_turno_valido(horario: datetime) -> bool:
     return horario.minute == 0 and HORA_PRIMER_TURNO <= horario.hour <= HORA_ULTIMO_TURNO
+
+
+def turnos_del_dia(fecha: date) -> list[datetime]:
+    return [
+        datetime(fecha.year, fecha.month, fecha.day, hora)
+        for hora in range(HORA_PRIMER_TURNO, HORA_ULTIMO_TURNO + 1)
+    ]
