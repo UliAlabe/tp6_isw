@@ -8,6 +8,7 @@ from app.dominio.errores import (
     SinCupoError,
     TalleRequeridoError,
     TerminosNoAceptadosError,
+    SuperposicionHorariaError,
 )
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.repositorios.repositorio_inscripciones_en_memoria import (
@@ -27,6 +28,7 @@ class TestInscripcionService(unittest.TestCase):
         self.repositorio = RepositorioCuposEnMemoria(
             {
                 ("tirolesa", HORARIO_10): 2,
+                ("safari", HORARIO_10): 5,
                 ("safari", HORARIO_11): 5,
                 ("palestra", HORARIO_12): 5,
             }
@@ -339,6 +341,26 @@ class TestInscripcionService(unittest.TestCase):
 
         # Act: no debe levantar ningún error
         self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_visitante_ya_tiene_otra_actividad_en_el_mismo_horario(self):
+        # Arrange: Ana ya está inscripta en la tirolesa de las 10:00
+        self.servicio.inscribir(
+            self._datos_validos(
+                cantidad_personas=1,
+                participantes=[self._participante_valido()],
+            )
+        )
+        # Ana intenta inscribirse al safari, también a las 10:00
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_10,
+            cantidad_personas=1,
+            participantes=[self._participante_valido(talle=None)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(SuperposicionHorariaError):
+            self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
