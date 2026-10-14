@@ -46,7 +46,7 @@ No agregar librerías fuera de esta lista sin consultar. Las dependencias del ba
 
 ## 4. Estilo del código
 
-- **4 espacios** de indentación, comillas dobles, máximo 100 caracteres por línea (`ruff` lo aplica solo).
+- **4 espacios** de indentación, comillas dobles, máximo 100 caracteres por línea.
 - Type hints en todas las funciones (parámetros y retorno).
 - Imports ordenados: librería estándar, librerías externas, código propio.
 - Usar f-strings para armar textos.
@@ -99,7 +99,7 @@ Los errores siempre tienen el mismo formato:
 | `ACTIVIDAD_NO_ENCONTRADA` | 404 |
 | `SIN_CUPO`, `HORARIO_NO_DISPONIBLE` | 409 |
 
-## 7. Tests unitarios (pytest)
+## 7. Tests unitarios (unittest)
 
 - Un archivo de test por archivo de código (`test_*.py`), dentro de la carpeta `tests/`.
 - Funciones `test_` con nombres en español que describen el comportamiento:
