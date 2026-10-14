@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from datetime import datetime
 from app.dominio.errores import (
     DatosInvalidosError,
+    FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
     SinCupoError,
     TalleRequeridoError,
@@ -42,7 +43,7 @@ class TestInscripcionService(unittest.TestCase):
             self.generador_qr,
             self.reloj,
         )
-        
+
     def _participante_valido(self, **cambios):
         participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
         participante.update(cambios)
@@ -265,7 +266,7 @@ class TestInscripcionService(unittest.TestCase):
         )
 
         # Act: no debe levantar ningún error
-        self.servicio.inscribir(datos)         
+        self.servicio.inscribir(datos)
 
     def test_debe_rechazar_la_inscripcion_cuando_el_participante_no_informa_la_edad(self):
         # Arrange: el safari admite todas las edades, pero la edad es un dato obligatorio
@@ -304,6 +305,15 @@ class TestInscripcionService(unittest.TestCase):
 
         # Act: no debe levantar ningún error
         self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_con_mas_de_24_horas_de_anticipacion(self):
+        # Arrange: son las 08:00 del día anterior, 26 horas antes del turno de las 10:00
+        self.reloj.ahora.return_value = datetime(2026, 10, 13, 8, 0)
+        datos = self._datos_validos()
+
+        # Act y Assert
+        with self.assertRaises(FueraDeVentanaDeInscripcionError):
+            self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
