@@ -12,13 +12,19 @@ def tiene_nombre(participante: dict) -> bool:
 
 
 def tiene_dni_valido(participante: dict) -> bool:
-    dni = str(participante.get("dni", ""))
-    return dni.isdigit() and len(dni) in LONGITUDES_DNI_VALIDAS
+    dni = participante.get("dni")
+    return (
+        isinstance(dni, str)
+        and dni.isascii()
+        and dni.isdigit()
+        and len(dni) in LONGITUDES_DNI_VALIDAS
+    )
 
 
 def tiene_edad_valida(participante: dict, edad_minima: int) -> bool:
     edad = participante.get("edad")
-    return isinstance(edad, int) and edad_minima <= edad <= EDAD_MAXIMA
+    es_entero = isinstance(edad, int) and not isinstance(edad, bool)
+    return es_entero and edad_minima <= edad <= EDAD_MAXIMA
 
 
 def tiene_datos_validos(participante: dict, edad_minima: int) -> bool:

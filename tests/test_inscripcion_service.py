@@ -395,5 +395,41 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_la_edad_es_un_booleano(self):
+        # Arrange: True es un int en Python, pero no es una edad
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_11,
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=True, talle=None)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_dni_es_un_numero_en_lugar_de_texto(self):
+        # Arrange: 30111222 != "30111222", así que el DNI debe llegar siempre como texto
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni=30111222)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_dni_tiene_digitos_que_no_son_ascii(self):
+        # Arrange: son dígitos arábigos orientales (٣٠١١١٢٢٢): str.isdigit() los acepta
+        dni_arabe = "\u0663\u0660\u0661\u0661\u0661\u0662\u0662\u0662"
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni=dni_arabe)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
