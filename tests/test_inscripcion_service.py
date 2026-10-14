@@ -273,5 +273,16 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_el_talle_no_pertenece_a_la_escala(self):
+        # Arrange: la tirolesa exige talle y "XXXL" no está entre XS y XXL
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(talle="XXXL")],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
