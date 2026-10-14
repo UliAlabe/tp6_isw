@@ -68,11 +68,12 @@ class InscripcionService:
             raise TerminosNoAceptadosError()
 
     def _validar_horario(self, actividad_id: str, horario: datetime) -> None:
-        if not esta_abierto(horario.date()):
-            raise HorarioNoDisponibleError()
-        if not es_turno_valido(horario):
-            raise HorarioNoDisponibleError()
-        if not self._repositorio_cupos.existe_horario(actividad_id, horario):
+        horario_disponible = (
+            esta_abierto(horario.date())
+            and es_turno_valido(horario)
+            and self._repositorio_cupos.existe_horario(actividad_id, horario)
+        )
+        if not horario_disponible:
             raise HorarioNoDisponibleError()
 
     def _validar_cupo(self, actividad_id: str, horario: datetime, cantidad_personas: int) -> None:
