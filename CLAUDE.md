@@ -139,4 +139,5 @@ refactor(inscripcion): extraer validación de cupo
 ```bash
 python -m unittest discover -v   # correr tests
 uvicorn app.main:app --reload    # levantar backend
+venv\Scripts\Activate.ps1        # levantar el entorno de prueba
 ```

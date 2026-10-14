@@ -34,6 +34,7 @@ def tiene_datos_validos(participante: dict, edad_minima: int) -> bool:
         and tiene_edad_valida(participante, edad_minima)
     )
 
+
 def tiene_talle_valido(participante: dict) -> bool:
     return participante.get("talle") in TALLES_VALIDOS
 
