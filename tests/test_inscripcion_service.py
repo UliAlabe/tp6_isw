@@ -395,5 +395,18 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_la_edad_es_un_booleano(self):
+        # Arrange: True es un int en Python, pero no es una edad
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_11,
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=True, talle=None)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
