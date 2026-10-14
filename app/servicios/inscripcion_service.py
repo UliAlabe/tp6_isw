@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.dominio.calendario_parque import esta_abierto
 from app.dominio.catalogo_actividades import edad_minima, requiere_talle
 from app.dominio.errores import (
     DatosInvalidosError,
@@ -67,6 +68,8 @@ class InscripcionService:
             raise TerminosNoAceptadosError()
 
     def _validar_horario(self, actividad_id: str, horario: datetime) -> None:
+        if not esta_abierto(horario.date()):
+            raise HorarioNoDisponibleError()
         if not self._repositorio_cupos.existe_horario(actividad_id, horario):
             raise HorarioNoDisponibleError()
 
