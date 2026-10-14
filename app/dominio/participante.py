@@ -16,7 +16,8 @@ def tiene_dni_valido(participante: dict) -> bool:
 
 
 def tiene_edad_valida(participante: dict, edad_minima: int) -> bool:
-    return edad_minima <= participante.get("edad", 0) <= EDAD_MAXIMA
+    edad = participante.get("edad")
+    return isinstance(edad, int) and edad_minima <= edad <= EDAD_MAXIMA
 
 
 def tiene_datos_validos(participante: dict, edad_minima: int) -> bool:
