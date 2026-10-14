@@ -6,7 +6,7 @@ from app.dominio.errores import (
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
-from app.dominio.participante import tiene_datos_validos, tiene_talle
+from app.dominio.participante import tiene_datos_validos, tiene_talle, tiene_talle_valido
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
@@ -62,8 +62,12 @@ class InscripcionService:
             raise SinCupoError()
 
     def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
-        if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
+        if not requiere_talle(actividad_id):
+            return
+        if not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
+        if not all(tiene_talle_valido(p) for p in participantes):
+            raise DatosInvalidosError("El talle no pertenece a la escala disponible")
 
     def _validar_datos_participantes(self, actividad_id: str, participantes: list[dict]) -> None:
         minima = edad_minima(actividad_id)
