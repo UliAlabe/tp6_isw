@@ -47,6 +47,7 @@ class InscripcionService:
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(actividad_id, participantes)
+        self._validar_dni_unicos(participantes)
         self._validar_superposicion(horario, participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
@@ -99,3 +100,8 @@ class InscripcionService:
         repositorio = self._repositorio_inscripciones
         if any(repositorio.tiene_inscripcion(p["dni"], horario) for p in participantes):
             raise SuperposicionHorariaError()
+
+    def _validar_dni_unicos(self, participantes: list[dict]) -> None:
+        dnis = [p["dni"] for p in participantes]
+        if len(dnis) != len(set(dnis)):
+            raise DatosInvalidosError("Hay participantes con el mismo DNI")
