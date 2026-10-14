@@ -10,4 +10,4 @@ def esta_abierto(fecha: date) -> bool:
 
 
 def es_turno_valido(horario: datetime) -> bool:
-    return horario.hour <= HORA_ULTIMO_TURNO
+    return horario.minute == 0 and horario.hour <= HORA_ULTIMO_TURNO
