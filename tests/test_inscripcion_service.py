@@ -408,5 +408,16 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_el_dni_es_un_numero_en_lugar_de_texto(self):
+        # Arrange: 30111222 != "30111222", así que el DNI debe llegar siempre como texto
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni=30111222)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
