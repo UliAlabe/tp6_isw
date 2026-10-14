@@ -362,5 +362,25 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(SuperposicionHorariaError):
             self.servicio.inscribir(datos)
 
+    def test_debe_aceptar_la_inscripcion_de_otro_visitante_en_el_mismo_horario(self):
+        # Arrange: Ana ya está inscripta en la tirolesa de las 10:00
+        self.servicio.inscribir(
+            self._datos_validos(
+                cantidad_personas=1,
+                participantes=[self._participante_valido()],
+            )
+        )
+        # Luis, con otro DNI, se inscribe al safari del mismo horario
+        luis = self._participante_valido(nombre="Luis Gómez", dni="28555666", talle=None)
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_10,
+            cantidad_personas=1,
+            participantes=[luis],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
