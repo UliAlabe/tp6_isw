@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-
+from datetime import datetime
 from app.dominio.errores import (
     DatosInvalidosError,
     HorarioNoDisponibleError,
@@ -14,14 +14,18 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 )
 from app.servicios.inscripcion_service import InscripcionService
 
+HORARIO_10 = datetime(2026, 10, 14, 10, 0)
+HORARIO_11 = datetime(2026, 10, 14, 11, 0)
+HORARIO_12 = datetime(2026, 10, 14, 12, 0)
+HORARIO_22 = datetime(2026, 10, 14, 22, 0)
 
 class TestInscripcionService(unittest.TestCase):
     def setUp(self):
         self.repositorio = RepositorioCuposEnMemoria(
             {
-                ("tirolesa", "10:00"): 2,
-                ("safari", "11:00"): 5,
-                ("palestra", "12:00"): 5,
+                ("tirolesa", HORARIO_10): 2,
+                ("safari", HORARIO_11): 5,
+                ("palestra", HORARIO_12): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -43,7 +47,7 @@ class TestInscripcionService(unittest.TestCase):
         datos = {
             "acepta_terminos": True,
             "actividad_id": "tirolesa",
-            "horario": "10:00",
+            "horario": HORARIO_10,
             "email": "visitante@correo.com",
             "cantidad_personas": 2,
             "participantes": [
@@ -72,7 +76,7 @@ class TestInscripcionService(unittest.TestCase):
 
     def test_debe_rechazar_la_inscripcion_cuando_el_horario_no_esta_disponible(self):
         # Arrange: a las 22:00 el parque está cerrado
-        datos = self._datos_validos(horario="22:00")
+        datos = self._datos_validos(horario=HORARIO_22)
 
         # Act y Assert
         with self.assertRaises(HorarioNoDisponibleError):
@@ -93,7 +97,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: el safari no exige talle y la participante no lo informa
         datos = self._datos_validos(
             actividad_id="safari",
-            horario="11:00",
+            horario=HORARIO_11,
             cantidad_personas=1,
             participantes=[self._participante_valido(talle=None)],
         )
@@ -160,7 +164,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: el safari admite todas las edades, incluso un bebé
         datos = self._datos_validos(
             actividad_id="safari",
-            horario="11:00",
+            horario=HORARIO_11,
             cantidad_personas=1,
             participantes=[self._participante_valido(edad=0, talle=None)],
         )
@@ -197,7 +201,7 @@ class TestInscripcionService(unittest.TestCase):
         self.servicio.inscribir(datos)
 
         # Assert
-        self.assertEqual(self.repositorio.obtener_cupo("tirolesa", "10:00"), 0)
+        self.assertEqual(self.repositorio.obtener_cupo("tirolesa", HORARIO_10), 0)
 
 
     def test_debe_enviar_el_email_de_confirmacion_al_visitante_al_inscribirse(self):
@@ -228,7 +232,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: la palestra exige 12 años o más y el participante tiene 10
         datos = self._datos_validos(
             actividad_id="palestra",
-            horario="12:00",
+            horario=HORARIO_12,
             cantidad_personas=1,
             participantes=[self._participante_valido(edad=10)],
         )
@@ -264,7 +268,7 @@ class TestInscripcionService(unittest.TestCase):
         del participante_sin_edad["edad"]
         datos = self._datos_validos(
             actividad_id="safari",
-            horario="11:00",
+            horario=HORARIO_11,
             cantidad_personas=1,
             participantes=[participante_sin_edad],
         )
@@ -288,7 +292,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: el safari no exige talle, así que ese dato no se valida
         datos = self._datos_validos(
             actividad_id="safari",
-            horario="11:00",
+            horario=HORARIO_11,
             cantidad_personas=1,
             participantes=[self._participante_valido(talle="XXXL")],
         )

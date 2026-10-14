@@ -13,6 +13,7 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 )
 from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
+from datetime import datetime
 
 
 class InscripcionService:
@@ -44,7 +45,7 @@ class InscripcionService:
         self._repositorio_inscripciones.guardar(datos)
         self._enviar_confirmacion(actividad_id, horario, datos["email"])
 
-    def _enviar_confirmacion(self, actividad_id: str, horario: str, email: str) -> None:
+    def _enviar_confirmacion(self, actividad_id: str, horario: datetime, email: str) -> None:
         qr = self._generador_qr.generar(f"{actividad_id} {horario} {email}")
         self._servicio_email.enviar_confirmacion(destinatario=email, qr=qr)
 
@@ -52,18 +53,18 @@ class InscripcionService:
         if not acepta_terminos:
             raise TerminosNoAceptadosError()
 
-    def _validar_horario(self, actividad_id: str, horario: str) -> None:
+    def _validar_horario(self, actividad_id: str, horario: datetime) -> None:
         if not self._repositorio_cupos.existe_horario(actividad_id, horario):
             raise HorarioNoDisponibleError()
 
-    def _validar_cupo(self, actividad_id: str, horario: str, cantidad_personas: int) -> None:
+    def _validar_cupo(self, actividad_id: str, horario: datetime, cantidad_personas: int) -> None:
         cupo = self._repositorio_cupos.obtener_cupo(actividad_id, horario)
         if cantidad_personas > cupo:
             raise SinCupoError()
 
     def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
         if not requiere_talle(actividad_id):
-            return
+           return
         if not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
         if not all(tiene_talle_valido(p) for p in participantes):
