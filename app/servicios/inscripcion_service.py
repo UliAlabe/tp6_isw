@@ -23,6 +23,7 @@ from app.servicios.generador_qr import GeneradorQr
 from app.servicios.reloj import Reloj
 from app.servicios.servicio_email import ServicioEmail
 
+
 class InscripcionService:
     def __init__(
         self,
@@ -108,4 +109,3 @@ class InscripcionService:
     def _validar_dni_unicos(self, participantes: list[dict]) -> None:
         if tiene_dni_repetido(participantes):
             raise DatosInvalidosError("Hay participantes con el mismo DNI")
-    
