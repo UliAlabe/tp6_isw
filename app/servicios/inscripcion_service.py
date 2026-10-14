@@ -1,4 +1,7 @@
-from app.dominio.catalogo_actividades import edad_minima, requiere_talle
+from app.dominio.catalogo_actividades import (
+    edad_minima, 
+    requiere_talle,
+)
 from app.dominio.errores import (
     DatosInvalidosError,
     FueraDeVentanaDeInscripcionError,
@@ -8,7 +11,12 @@ from app.dominio.errores import (
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
-from app.dominio.participante import tiene_datos_validos, tiene_talle, tiene_talle_valido
+from app.dominio.participante import (
+    tiene_datos_validos,
+    tiene_dni_repetido,
+    tiene_talle,
+    tiene_talle_valido,
+)
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
@@ -102,6 +110,5 @@ class InscripcionService:
             raise SuperposicionHorariaError()
 
     def _validar_dni_unicos(self, participantes: list[dict]) -> None:
-        dnis = [p["dni"] for p in participantes]
-        if len(dnis) != len(set(dnis)):
+        if tiene_dni_repetido(participantes):
             raise DatosInvalidosError("Hay participantes con el mismo DNI")
