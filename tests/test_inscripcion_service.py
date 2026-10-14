@@ -26,6 +26,8 @@ LUNES_10 = datetime(2026, 10, 19, 10, 0)
 DOMINGO_20 = datetime(2026, 10, 18, 20, 0)
 NAVIDAD_10 = datetime(2026, 12, 25, 10, 0)
 VISPERA_NAVIDAD_20 = datetime(2026, 12, 24, 20, 0)
+ANIO_NUEVO_10 = datetime(2027, 1, 1, 10, 0)
+VISPERA_ANIO_NUEVO_20 = datetime(2026, 12, 31, 20, 0)
 
 
 class TestInscripcionService(unittest.TestCase):
@@ -38,6 +40,7 @@ class TestInscripcionService(unittest.TestCase):
                 ("palestra", HORARIO_12): 5,
                 ("tirolesa", LUNES_10): 5,
                 ("tirolesa", NAVIDAD_10): 5,
+                ("tirolesa", ANIO_NUEVO_10): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -456,6 +459,19 @@ class TestInscripcionService(unittest.TestCase):
         self.reloj.ahora.return_value = VISPERA_NAVIDAD_20
         datos = self._datos_validos(
             horario=NAVIDAD_10,
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+
+        # Act y Assert
+        with self.assertRaises(HorarioNoDisponibleError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_parque_cierra_el_1_de_enero(self):
+        # Arrange: el 1/1/2027 hay cupo cargado, pero el parque está cerrado
+        self.reloj.ahora.return_value = VISPERA_ANIO_NUEVO_20
+        datos = self._datos_validos(
+            horario=ANIO_NUEVO_10,
             cantidad_personas=1,
             participantes=[self._participante_valido()],
         )
