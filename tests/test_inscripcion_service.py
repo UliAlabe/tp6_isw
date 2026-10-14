@@ -419,5 +419,17 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_rechazar_la_inscripcion_cuando_el_dni_tiene_digitos_que_no_son_ascii(self):
+        # Arrange: son dígitos arábigos orientales (٣٠١١١٢٢٢): str.isdigit() los acepta
+        dni_arabe = "\u0663\u0660\u0661\u0661\u0661\u0662\u0662\u0662"
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni=dni_arabe)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
