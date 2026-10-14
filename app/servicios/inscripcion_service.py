@@ -1,6 +1,7 @@
 from app.dominio.catalogo_actividades import edad_minima, requiere_talle
 from app.dominio.errores import (
     DatosInvalidosError,
+    FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
     SinCupoError,
     TalleRequeridoError,
@@ -13,9 +14,10 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 )
 from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.servicios.reloj import Reloj
 
+ANTICIPACION_MAXIMA = timedelta(hours=24)
 
 class InscripcionService:
     def __init__(
@@ -40,6 +42,7 @@ class InscripcionService:
 
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
+        self._validar_ventana(horario)
         self._validar_cupo(actividad_id, horario, cantidad_personas)
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
@@ -85,3 +88,8 @@ class InscripcionService:
             raise DatosInvalidosError(
                 "La cantidad de personas no coincide con los participantes cargados"
             )
+
+    def _validar_ventana(self, horario: datetime) -> None:
+        anticipacion = horario - self._reloj.ahora()
+        if anticipacion > ANTICIPACION_MAXIMA:
+            raise FueraDeVentanaDeInscripcionError()

@@ -21,3 +21,8 @@ class TalleRequeridoError(Exception):
 class DatosInvalidosError(Exception):
     def __init__(self, motivo: str = "Los datos de los participantes no son válidos") -> None:
         super().__init__(motivo)
+
+
+class FueraDeVentanaDeInscripcionError(Exception):
+    def __init__(self) -> None:
+        super().__init__("La inscripción a este turno no está habilitada en este momento")
