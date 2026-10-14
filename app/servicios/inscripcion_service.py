@@ -1,4 +1,4 @@
-from app.dominio.catalogo_actividades import requiere_talle
+from app.dominio.catalogo_actividades import edad_minima, requiere_talle
 from app.dominio.errores import (
     DatosInvalidosError,
     HorarioNoDisponibleError,
@@ -6,7 +6,7 @@ from app.dominio.errores import (
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
-from app.dominio.participante import tiene_datos_validos, tiene_talle
+from app.dominio.participante import tiene_datos_validos, tiene_talle, tiene_talle_valido
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
@@ -39,7 +39,7 @@ class InscripcionService:
         self._validar_cupo(actividad_id, horario, cantidad_personas)
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
-        self._validar_datos_participantes(participantes)
+        self._validar_datos_participantes(actividad_id, participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
         self._enviar_confirmacion(actividad_id, horario, datos["email"])
@@ -62,11 +62,16 @@ class InscripcionService:
             raise SinCupoError()
 
     def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
-        if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
+        if not requiere_talle(actividad_id):
+            return
+        if not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
+        if not all(tiene_talle_valido(p) for p in participantes):
+            raise DatosInvalidosError("El talle no pertenece a la escala disponible")
 
-    def _validar_datos_participantes(self, participantes: list[dict]) -> None:
-        if not all(tiene_datos_validos(p) for p in participantes):
+    def _validar_datos_participantes(self, actividad_id: str, participantes: list[dict]) -> None:
+        minima = edad_minima(actividad_id)
+        if not all(tiene_datos_validos(p, minima) for p in participantes):
             raise DatosInvalidosError()
 
     def _validar_cantidad_participantes(

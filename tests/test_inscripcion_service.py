@@ -21,6 +21,7 @@ class TestInscripcionService(unittest.TestCase):
             {
                 ("tirolesa", "10:00"): 2,
                 ("safari", "11:00"): 5,
+                ("palestra", "12:00"): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -137,7 +138,7 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: todos los datos son válidos salvo la edad
         datos = self._datos_validos(
             cantidad_personas=1,
-            participantes=[self._participante_valido(edad=0)],
+            participantes=[self._participante_valido(edad=-1)],
         )
 
         # Act y Assert
@@ -154,6 +155,18 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
+
+    def test_debe_aceptar_la_inscripcion_de_un_participante_de_cero_anios_en_actividad_para_todas_las_edades(self):
+        # Arrange: el safari admite todas las edades, incluso un bebé
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=0, talle=None)],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
 
     def test_debe_rechazar_la_inscripcion_cuando_la_cantidad_no_coincide_con_los_participantes(self):
         # Arrange: se declaran 2 personas pero se carga solo 1 participante
@@ -211,6 +224,77 @@ class TestInscripcionService(unittest.TestCase):
         qr_enviado = self.servicio_email.enviar_confirmacion.call_args.kwargs["qr"]
         self.assertEqual(qr_enviado, b"imagen-qr")
 
+    def test_debe_rechazar_la_inscripcion_de_un_menor_de_12_anios_en_palestra(self):
+        # Arrange: la palestra exige 12 años o más y el participante tiene 10
+        datos = self._datos_validos(
+            actividad_id="palestra",
+            horario="12:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=10)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_de_un_menor_de_8_anios_en_tirolesa(self):
+        # Arrange: la tirolesa exige 8 años o más y el participante tiene 7
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=7)],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+    
+    def test_debe_aceptar_la_inscripcion_de_un_participante_con_la_edad_minima_exacta(self):
+        # Arrange: la tirolesa exige 8 años y el participante tiene justo 8
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(edad=8)],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)         
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_participante_no_informa_la_edad(self):
+        # Arrange: el safari admite todas las edades, pero la edad es un dato obligatorio
+        participante_sin_edad = self._participante_valido(talle=None)
+        del participante_sin_edad["edad"]
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[participante_sin_edad],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_talle_no_pertenece_a_la_escala(self):
+        # Arrange: la tirolesa exige talle y "XXXL" no está entre XS y XXL
+        datos = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido(talle="XXXL")],
+        )
+
+        # Act y Assert
+        with self.assertRaises(DatosInvalidosError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_aceptar_la_inscripcion_con_talle_fuera_de_la_escala_cuando_la_actividad_no_lo_requiere(self):
+        # Arrange: el safari no exige talle, así que ese dato no se valida
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(talle="XXXL")],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
