@@ -31,6 +31,8 @@ VISPERA_ANIO_NUEVO_20 = datetime(2026, 12, 31, 20, 0)
 HORARIO_18 = datetime(2026, 10, 14, 18, 0)
 HORARIO_10_30 = datetime(2026, 10, 14, 10, 30)
 HORARIO_8 = datetime(2026, 10, 14, 8, 0)
+HORARIO_9 = datetime(2026, 10, 14, 9, 0)
+HORARIO_17 = datetime(2026, 10, 14, 17, 0)
 
 
 class TestInscripcionService(unittest.TestCase):
@@ -47,6 +49,8 @@ class TestInscripcionService(unittest.TestCase):
                 ("tirolesa", HORARIO_18): 5,
                 ("tirolesa", HORARIO_10_30): 5,
                 ("tirolesa", HORARIO_8): 5,
+                ("tirolesa", HORARIO_9): 5,
+                ("tirolesa", HORARIO_17): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -521,6 +525,34 @@ class TestInscripcionService(unittest.TestCase):
         # Act y Assert
         with self.assertRaises(HorarioNoDisponibleError):
             self.servicio.inscribir(datos)
+
+    def test_debe_aceptar_la_inscripcion_en_el_primer_turno_de_las_9(self):
+        # Arrange: las 09:00 es el primer turno del día
+        datos = self._datos_validos(
+            horario=HORARIO_9,
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
+
+    def test_debe_aceptar_la_inscripcion_en_el_ultimo_turno_de_las_17(self):
+        # Arrange: las 17:00 es el último turno del día
+        datos = self._datos_validos(
+            horario=HORARIO_17,
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+
+        # Act
+        self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
 
 if __name__ == "__main__":
     unittest.main()
