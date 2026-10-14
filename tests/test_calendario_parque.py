@@ -4,6 +4,7 @@ from datetime import date, datetime
 from app.dominio.calendario_parque import turnos_del_dia
 
 MIERCOLES = date(2026, 10, 14)
+LUNES = date(2026, 10, 19)
 
 
 class TestCalendarioParque(unittest.TestCase):
@@ -16,3 +17,12 @@ class TestCalendarioParque(unittest.TestCase):
 
         # Assert
         self.assertEqual(turnos, esperados)
+
+    def test_debe_devolver_una_lista_vacia_cuando_el_parque_esta_cerrado(self):
+        # Arrange: los lunes el parque cierra
+
+        # Act
+        turnos = turnos_del_dia(LUNES)
+
+        # Assert
+        self.assertEqual(turnos, [])
