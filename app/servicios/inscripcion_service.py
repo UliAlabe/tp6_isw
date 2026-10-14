@@ -16,7 +16,7 @@ from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
 from datetime import datetime
 from app.servicios.reloj import Reloj
-from app.dominio.ventana_inscripcion import ANTICIPACION_MAXIMA
+from app.dominio.ventana_inscripcion import ANTICIPACION_MAXIMA, ANTICIPACION_MINIMA
 
 
 class InscripcionService:
@@ -91,5 +91,5 @@ class InscripcionService:
 
     def _validar_ventana(self, horario: datetime) -> None:
         anticipacion = horario - self._reloj.ahora()
-        if anticipacion > ANTICIPACION_MAXIMA:
+        if anticipacion > ANTICIPACION_MAXIMA or anticipacion < ANTICIPACION_MINIMA:
             raise FueraDeVentanaDeInscripcionError()
