@@ -26,3 +26,8 @@ class DatosInvalidosError(Exception):
 class FueraDeVentanaDeInscripcionError(Exception):
     def __init__(self) -> None:
         super().__init__("La inscripción a este turno no está habilitada en este momento")
+
+
+class SuperposicionHorariaError(Exception):
+    def __init__(self) -> None:
+        super().__init__("El visitante ya tiene una inscripción en ese horario")

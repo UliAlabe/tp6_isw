@@ -30,3 +30,7 @@ def tiene_datos_validos(participante: dict, edad_minima: int) -> bool:
 
 def tiene_talle_valido(participante: dict) -> bool:
     return participante.get("talle") in TALLES_VALIDOS
+
+def tiene_dni_repetido(participantes: list[dict]) -> bool:
+    dnis = [p["dni"] for p in participantes]
+    return len(dnis) != len(set(dnis))

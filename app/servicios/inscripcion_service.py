@@ -1,13 +1,22 @@
-from app.dominio.catalogo_actividades import edad_minima, requiere_talle
+from app.dominio.catalogo_actividades import (
+    edad_minima, 
+    requiere_talle,
+)
 from app.dominio.errores import (
     DatosInvalidosError,
     FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
     SinCupoError,
+    SuperposicionHorariaError,
     TalleRequeridoError,
     TerminosNoAceptadosError,
 )
-from app.dominio.participante import tiene_datos_validos, tiene_talle, tiene_talle_valido
+from app.dominio.participante import (
+    tiene_datos_validos,
+    tiene_dni_repetido,
+    tiene_talle,
+    tiene_talle_valido,
+)
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.repositorios.repositorio_inscripciones_en_memoria import (
     RepositorioInscripcionesEnMemoria,
@@ -46,6 +55,8 @@ class InscripcionService:
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
         self._validar_datos_participantes(actividad_id, participantes)
+        self._validar_dni_unicos(participantes)
+        self._validar_superposicion(horario, participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
         self._enviar_confirmacion(actividad_id, horario, datos["email"])
@@ -92,3 +103,12 @@ class InscripcionService:
         anticipacion = horario - self._reloj.ahora()
         if not esta_dentro_de_la_ventana(anticipacion):
             raise FueraDeVentanaDeInscripcionError()
+
+    def _validar_superposicion(self, horario: datetime, participantes: list[dict]) -> None:
+        repositorio = self._repositorio_inscripciones
+        if any(repositorio.tiene_inscripcion(p["dni"], horario) for p in participantes):
+            raise SuperposicionHorariaError()
+
+    def _validar_dni_unicos(self, participantes: list[dict]) -> None:
+        if tiene_dni_repetido(participantes):
+            raise DatosInvalidosError("Hay participantes con el mismo DNI")
