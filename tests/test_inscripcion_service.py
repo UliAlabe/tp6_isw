@@ -30,6 +30,7 @@ ANIO_NUEVO_10 = datetime(2027, 1, 1, 10, 0)
 VISPERA_ANIO_NUEVO_20 = datetime(2026, 12, 31, 20, 0)
 HORARIO_18 = datetime(2026, 10, 14, 18, 0)
 HORARIO_10_30 = datetime(2026, 10, 14, 10, 30)
+HORARIO_8 = datetime(2026, 10, 14, 8, 0)
 
 
 class TestInscripcionService(unittest.TestCase):
@@ -45,6 +46,7 @@ class TestInscripcionService(unittest.TestCase):
                 ("tirolesa", ANIO_NUEVO_10): 5,
                 ("tirolesa", HORARIO_18): 5,
                 ("tirolesa", HORARIO_10_30): 5,
+                ("tirolesa", HORARIO_8): 5,
             }
         )
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
@@ -500,6 +502,19 @@ class TestInscripcionService(unittest.TestCase):
         # Arrange: hay cupo cargado, pero los turnos son solo en hora en punto
         datos = self._datos_validos(
             horario=HORARIO_10_30,
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+        # Act y Assert
+        with self.assertRaises(HorarioNoDisponibleError):
+            self.servicio.inscribir(datos)
+
+    def test_debe_rechazar_la_inscripcion_cuando_el_horario_es_anterior_al_primer_turno_de_las_9(self):
+        # Arrange: hay cupo cargado, pero el primer turno es a las 09:00.
+        # El reloj va antes de las 8:00 para que la ventana de 15 minutos no sea la causa del rechazo.
+        self.reloj.ahora.return_value = datetime(2026, 10, 14, 7, 0)
+        datos = self._datos_validos(
+            horario=HORARIO_8,
             cantidad_personas=1,
             participantes=[self._participante_valido()],
         )
