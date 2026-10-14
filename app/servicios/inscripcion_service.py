@@ -1,4 +1,4 @@
-from app.dominio.catalogo_actividades import requiere_talle
+from app.dominio.catalogo_actividades import edad_minima, requiere_talle
 from app.dominio.errores import (
     DatosInvalidosError,
     HorarioNoDisponibleError,
@@ -39,7 +39,7 @@ class InscripcionService:
         self._validar_cupo(actividad_id, horario, cantidad_personas)
         self._validar_cantidad_participantes(cantidad_personas, participantes)
         self._validar_talle(actividad_id, participantes)
-        self._validar_datos_participantes(participantes)
+        self._validar_datos_participantes(actividad_id, participantes)
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
         self._enviar_confirmacion(actividad_id, horario, datos["email"])
@@ -65,8 +65,9 @@ class InscripcionService:
         if requiere_talle(actividad_id) and not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
 
-    def _validar_datos_participantes(self, participantes: list[dict]) -> None:
-        if not all(tiene_datos_validos(p) for p in participantes):
+    def _validar_datos_participantes(self, actividad_id: str, participantes: list[dict]) -> None:
+        minima = edad_minima(actividad_id)
+        if not all(tiene_datos_validos(p, minima) for p in participantes):
             raise DatosInvalidosError()
 
     def _validar_cantidad_participantes(

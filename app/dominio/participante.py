@@ -1,5 +1,4 @@
 LONGITUDES_DNI_VALIDAS = (7, 8)
-EDAD_MINIMA = 0
 EDAD_MAXIMA = 120
 
 
@@ -16,15 +15,15 @@ def tiene_dni_valido(participante: dict) -> bool:
     return dni.isdigit() and len(dni) in LONGITUDES_DNI_VALIDAS
 
 
-def tiene_edad_valida(participante: dict) -> bool:
-    return EDAD_MINIMA <= participante.get("edad", 0) <= EDAD_MAXIMA
+def tiene_edad_valida(participante: dict, edad_minima: int) -> bool:
+    return edad_minima <= participante.get("edad", 0) <= EDAD_MAXIMA
 
 
-def tiene_datos_validos(participante: dict) -> bool:
+def tiene_datos_validos(participante: dict, edad_minima: int) -> bool:
     return (
         tiene_nombre(participante)
         and tiene_dni_valido(participante)
-        and tiene_edad_valida(participante)
+        and tiene_edad_valida(participante, edad_minima)
     )
 
 
