@@ -14,10 +14,12 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 )
 from app.servicios.inscripcion_service import InscripcionService
 
+
 HORARIO_10 = datetime(2026, 10, 14, 10, 0)
 HORARIO_11 = datetime(2026, 10, 14, 11, 0)
 HORARIO_12 = datetime(2026, 10, 14, 12, 0)
 HORARIO_22 = datetime(2026, 10, 14, 22, 0)
+AHORA = datetime(2026, 10, 14, 8, 0)
 
 class TestInscripcionService(unittest.TestCase):
     def setUp(self):
@@ -31,13 +33,16 @@ class TestInscripcionService(unittest.TestCase):
         self.repositorio_inscripciones = RepositorioInscripcionesEnMemoria()
         self.servicio_email = MagicMock()
         self.generador_qr = MagicMock()
+        self.reloj = MagicMock()
+        self.reloj.ahora.return_value = AHORA
         self.servicio = InscripcionService(
             self.repositorio,
             self.repositorio_inscripciones,
             self.servicio_email,
             self.generador_qr,
+            self.reloj,
         )
-
+        
     def _participante_valido(self, **cambios):
         participante = {"nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M"}
         participante.update(cambios)

@@ -14,6 +14,7 @@ from app.repositorios.repositorio_inscripciones_en_memoria import (
 from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
 from datetime import datetime
+from app.servicios.reloj import Reloj
 
 
 class InscripcionService:
@@ -23,11 +24,13 @@ class InscripcionService:
         repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
         servicio_email: ServicioEmail,
         generador_qr: GeneradorQr,
+        reloj: Reloj,
     ) -> None:
         self._repositorio_cupos = repositorio_cupos
         self._repositorio_inscripciones = repositorio_inscripciones
         self._servicio_email = servicio_email
         self._generador_qr = generador_qr
+        self._reloj = reloj
 
     def inscribir(self, datos: dict) -> None:
         actividad_id = datos["actividad_id"]
@@ -64,7 +67,7 @@ class InscripcionService:
 
     def _validar_talle(self, actividad_id: str, participantes: list[dict]) -> None:
         if not requiere_talle(actividad_id):
-           return
+            return
         if not all(tiene_talle(p) for p in participantes):
             raise TalleRequeridoError()
         if not all(tiene_talle_valido(p) for p in participantes):
