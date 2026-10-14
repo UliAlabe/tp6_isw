@@ -1,7 +1,6 @@
-from app.dominio.catalogo_actividades import (
-    edad_minima, 
-    requiere_talle,
-)
+from datetime import datetime
+
+from app.dominio.catalogo_actividades import edad_minima, requiere_talle
 from app.dominio.errores import (
     DatosInvalidosError,
     FueraDeVentanaDeInscripcionError,
@@ -17,13 +16,12 @@ from app.dominio.participante import (
     tiene_talle,
     tiene_talle_valido,
 )
+from app.dominio.ventana_inscripcion import esta_dentro_de_la_ventana
 from app.repositorios.repositorio_cupos import RepositorioCupos
 from app.repositorios.repositorio_inscripciones import RepositorioInscripciones
 from app.servicios.generador_qr import GeneradorQr
-from app.servicios.servicio_email import ServicioEmail
-from datetime import datetime
 from app.servicios.reloj import Reloj
-from app.dominio.ventana_inscripcion import esta_dentro_de_la_ventana
+from app.servicios.servicio_email import ServicioEmail
 
 class InscripcionService:
     def __init__(
@@ -110,3 +108,4 @@ class InscripcionService:
     def _validar_dni_unicos(self, participantes: list[dict]) -> None:
         if tiene_dni_repetido(participantes):
             raise DatosInvalidosError("Hay participantes con el mismo DNI")
+    
