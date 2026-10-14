@@ -96,10 +96,6 @@ class InscripcionService:
             raise FueraDeVentanaDeInscripcionError()
 
     def _validar_superposicion(self, horario: datetime, participantes: list[dict]) -> None:
-        dnis_nuevos = {p["dni"] for p in participantes}
-        for inscripcion in self._repositorio_inscripciones.listar():
-            if inscripcion["horario"] != horario:
-                continue
-            dnis_existentes = {p["dni"] for p in inscripcion["participantes"]}
-            if dnis_nuevos & dnis_existentes:
-                raise SuperposicionHorariaError()
+        repositorio = self._repositorio_inscripciones
+        if any(repositorio.tiene_inscripcion(p["dni"], horario) for p in participantes):
+            raise SuperposicionHorariaError()
