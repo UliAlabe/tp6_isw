@@ -12,7 +12,7 @@
 
 | Parte | Tecnología |
 |-------|-----------|
-| Lenguaje del backend | Python 3.12 (con type hints) |
+| Lenguaje del backend | Python 3.14 (con type hints) |
 | Backend | FastAPI + Uvicorn |
 | Tests unitarios | unittest |
 | Tests de endpoints | `TestClient` de FastAPI (requiere `httpx`) |
@@ -46,7 +46,7 @@ No agregar librerías fuera de esta lista sin consultar. Las dependencias del ba
 
 ## 4. Estilo del código
 
-- **4 espacios** de indentación, comillas dobles, máximo 100 caracteres por línea (`ruff` lo aplica solo).
+- **4 espacios** de indentación, comillas dobles, máximo 100 caracteres por línea.
 - Type hints en todas las funciones (parámetros y retorno).
 - Imports ordenados: librería estándar, librerías externas, código propio.
 - Usar f-strings para armar textos.
@@ -99,22 +99,22 @@ Los errores siempre tienen el mismo formato:
 | `ACTIVIDAD_NO_ENCONTRADA` | 404 |
 | `SIN_CUPO`, `HORARIO_NO_DISPONIBLE` | 409 |
 
-## 7. Tests unitarios (pytest)
+## 7. Tests unitarios (unittest)
 
 - Un archivo de test por archivo de código (`test_*.py`), dentro de la carpeta `tests/`.
 - Funciones `test_` con nombres en español que describen el comportamiento:
 
 ```python
-def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario():
+def test_debe_rechazar_la_inscripcion_cuando_no_hay_cupo_para_el_horario(self):
     # Arrange: preparar datos
     # Act y Assert: ejecutar y verificar
-    with pytest.raises(SinCupoError):
-        servicio.inscribir(datos)
+    with self.assertRaises(SinCupoError):
+        self.servicio.inscribir(datos)
 ```
 
 - Patrón **Arrange / Act / Assert**, una verificación principal por test.
 - Email y QR se reemplazan por `MagicMock`; los repositorios, por versiones en memoria.
-- Los datos de ejemplo repetidos van en `fixtures` de pytest.
+- Los datos de ejemplo repetidos van en setUp. y en métodos auxiliares (_datos_validos, _participante_valido).
 - Los tests no dependen unos de otros.
 
 ## 8. TDD y commits
@@ -137,9 +137,6 @@ refactor(inscripcion): extraer validación de cupo
 ## 9. Comandos
 
 ```bash
-pytest                        # correr tests
-ptw                           # modo TDD (requiere pytest-watch)
-ruff check .                  # revisar estilo
-ruff format .                 # formatear código
-uvicorn app.main:app --reload # levantar backend
+python -m unittest discover -v   # correr tests
+uvicorn app.main:app --reload    # levantar backend
 ```

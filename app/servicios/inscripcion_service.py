@@ -17,10 +17,8 @@ from app.dominio.participante import (
     tiene_talle,
     tiene_talle_valido,
 )
-from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
-from app.repositorios.repositorio_inscripciones_en_memoria import (
-    RepositorioInscripcionesEnMemoria,
-)
+from app.repositorios.repositorio_cupos import RepositorioCupos
+from app.repositorios.repositorio_inscripciones import RepositorioInscripciones
 from app.servicios.generador_qr import GeneradorQr
 from app.servicios.servicio_email import ServicioEmail
 from datetime import datetime
@@ -30,8 +28,8 @@ from app.dominio.ventana_inscripcion import esta_dentro_de_la_ventana
 class InscripcionService:
     def __init__(
         self,
-        repositorio_cupos: RepositorioCuposEnMemoria,
-        repositorio_inscripciones: RepositorioInscripcionesEnMemoria,
+        repositorio_cupos: RepositorioCupos,
+        repositorio_inscripciones: RepositorioInscripciones,
         servicio_email: ServicioEmail,
         generador_qr: GeneradorQr,
         reloj: Reloj,
