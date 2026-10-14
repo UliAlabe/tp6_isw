@@ -1,0 +1,70 @@
+### Requisitos previos
+
+- **Git**.
+- **Python 3.14** (el mismo que usa el proyecto). Verificar con `python --version`.
+- **Node.js** (solo cuando exista el frontend).
+
+### Pasos (PowerShell en Windows)
+
+1. Clonar el repositorio y entrar a la carpeta:
+
+```powershell
+git clone https://github.com/UliAlabe/tp6_isw.git
+cd tp6_isw
+```
+
+2. Crear el entorno virtual (la carpeta `venv/` está en `.gitignore`):
+
+```powershell
+python -m venv venv
+```
+
+3. Activarlo. El prompt tiene que empezar con `(venv)`:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+   Si PowerShell bloquea el script, ejecutar una vez
+   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y repetir la activación.
+   En Linux o macOS: `source venv/bin/activate`.
+
+4. Instalar las dependencias (usar `python -m pip`, no `pip` a secas):
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+5. Correr los tests para comprobar que todo funciona:
+
+```powershell
+python -m unittest discover -v
+```
+
+   Tienen que pasar todos (`OK`).
+
+### Backend (cuando exista la API)
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+La API queda en `http://127.0.0.1:8000` y la documentación automática en `http://127.0.0.1:8000/docs`.
+
+### Frontend (cuando exista)
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---------|----------|
+| `python` no se reconoce | Instalar Python marcando "Add to PATH", o probar `py` |
+| `pip.exe` bloqueado | Usar siempre `python -m pip` |
+| `No module named 'app'` | Ejecutar los comandos desde la raíz del repo, no desde `app/` ni `tests/` |
+| `Ran 0 tests` | Falta algún `__init__.py` en `app/` o `tests/` |
+| `not a git repository` | Entrar a la carpeta del repo (`cd tp6_isw`) |
