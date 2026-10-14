@@ -284,5 +284,17 @@ class TestInscripcionService(unittest.TestCase):
         with self.assertRaises(DatosInvalidosError):
             self.servicio.inscribir(datos)
 
+    def test_debe_aceptar_la_inscripcion_con_talle_fuera_de_la_escala_cuando_la_actividad_no_lo_requiere(self):
+        # Arrange: el safari no exige talle, así que ese dato no se valida
+        datos = self._datos_validos(
+            actividad_id="safari",
+            horario="11:00",
+            cantidad_personas=1,
+            participantes=[self._participante_valido(talle="XXXL")],
+        )
+
+        # Act: no debe levantar ningún error
+        self.servicio.inscribir(datos)
+
 if __name__ == "__main__":
     unittest.main()
