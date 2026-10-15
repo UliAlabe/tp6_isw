@@ -588,6 +588,27 @@ class TestInscripcionService(unittest.TestCase):
             },
         )
 
+    def test_debe_enviar_en_el_email_el_resumen_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert: el email recibe la misma reserva que devuelve inscribir
+        resumen = self.servicio_email.enviar_confirmacion.call_args.kwargs["reserva"]
+        self.assertEqual(resumen, reserva)
+        self.assertEqual(
+            reserva,
+            {
+                "codigo": reserva["codigo"],
+                "actividad_id": "tirolesa",
+                "horario": HORARIO_10,
+                "email": "visitante@correo.com",
+                "participantes": datos["participantes"],
+            },
+        )
+
 if __name__ == "__main__":
     unittest.main()
     
