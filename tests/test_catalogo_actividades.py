@@ -40,3 +40,14 @@ class TestCatalogoActividades(unittest.TestCase):
 
         # Assert
         self.assertEqual(cupos, esperados)
+
+    def test_debe_omitir_los_dias_cerrados_al_sembrar_varios_dias(self):
+        # Arrange: el miércoles abre y el lunes siguiente cierra
+        lunes = date(2026, 10, 19)
+
+        # Act
+        cupos = cupos_iniciales([MIERCOLES, lunes])
+
+        # Assert: 4 actividades x 9 turnos, todos del miércoles
+        self.assertEqual(len(cupos), 36)
+        self.assertTrue(all(turno.date() == MIERCOLES for _, turno in cupos))
