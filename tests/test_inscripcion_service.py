@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import MagicMock
 from datetime import datetime
@@ -563,6 +564,29 @@ class TestInscripcionService(unittest.TestCase):
 
         # Assert
         self.assertTrue(reserva["codigo"])
+
+    def test_debe_generar_un_unico_qr_con_los_datos_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert: un QR por grupo, con el código, la actividad, el horario y los participantes
+        self.generador_qr.generar.assert_called_once()
+        contenido = json.loads(self.generador_qr.generar.call_args.args[0])
+        self.assertEqual(
+            contenido,
+            {
+                "codigo": reserva["codigo"],
+                "actividad": "tirolesa",
+                "horario": "2026-10-14T10:00:00",
+                "participantes": [
+                    {"nombre": "Ana Pérez", "dni": "30111222"},
+                    {"nombre": "Luis Gómez", "dni": "28555666"},
+                ],
+            },
+        )
 
 if __name__ == "__main__":
     unittest.main()
