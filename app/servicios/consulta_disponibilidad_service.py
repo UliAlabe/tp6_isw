@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from app.dominio.calendario_parque import turnos_del_dia
 from app.dominio.catalogo_actividades import existe_actividad
@@ -18,10 +18,13 @@ class ConsultaDisponibilidadService:
             raise ActividadInexistenteError()
         ahora = self._reloj.ahora()
         return [
-            {
-                "horario": turno,
-                "cupos_disponibles": self._repositorio_cupos.obtener_cupo(actividad_id, turno),
-                "inscripcion_abierta": esta_dentro_de_la_ventana(turno - ahora),
-            }
+            self._describir_turno(actividad_id, turno, ahora)
             for turno in turnos_del_dia(fecha)
         ]
+
+    def _describir_turno(self, actividad_id: str, turno: datetime, ahora: datetime) -> dict:
+        return {
+            "horario": turno,
+            "cupos_disponibles": self._repositorio_cupos.obtener_cupo(actividad_id, turno),
+            "inscripcion_abierta": esta_dentro_de_la_ventana(turno - ahora),
+        }
