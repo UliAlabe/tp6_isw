@@ -57,36 +57,38 @@ class InscripcionService:
         self._validar_datos_participantes(actividad_id, participantes)
         self._validar_dni_unicos(participantes)
         self._validar_superposicion(horario, participantes)
-        codigo = self._generar_codigo_reserva()
+        reserva = {
+            "codigo": self._generar_codigo_reserva(),
+            "actividad_id": actividad_id,
+            "horario": horario,
+            "email": datos["email"],
+            "participantes": participantes,
+        }
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
-        self._enviar_confirmacion(codigo, actividad_id, horario, participantes, datos["email"])
-        return {"codigo": codigo}
+        self._enviar_confirmacion(reserva)
+        return reserva
 
     def _generar_codigo_reserva(self) -> str:
         return uuid4().hex[:8].upper()
 
-    def _enviar_confirmacion(
-        self,
-        codigo: str,
-        actividad_id: str,
-        horario: datetime,
-        participantes: list[dict],
-        email: str,
-    ) -> None:
+    def _enviar_confirmacion(self, reserva: dict) -> None:
         contenido = json.dumps(
             {
-                "codigo": codigo,
-                "actividad": actividad_id,
-                "horario": horario.isoformat(),
+                "codigo": reserva["codigo"],
+                "actividad": reserva["actividad_id"],
+                "horario": reserva["horario"].isoformat(),
                 "participantes": [
-                    {"nombre": p["nombre"], "dni": p["dni"]} for p in participantes
+                    {"nombre": p["nombre"], "dni": p["dni"]}
+                    for p in reserva["participantes"]
                 ],
             },
             ensure_ascii=False,
         )
         qr = self._generador_qr.generar(contenido)
-        self._servicio_email.enviar_confirmacion(destinatario=email, qr=qr)
+        self._servicio_email.enviar_confirmacion(
+            destinatario=reserva["email"], qr=qr, reserva=reserva
+        )
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:
