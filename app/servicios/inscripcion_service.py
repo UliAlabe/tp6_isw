@@ -73,7 +73,13 @@ class InscripcionService:
         return uuid4().hex[:8].upper()
 
     def _enviar_confirmacion(self, reserva: dict) -> None:
-        contenido = json.dumps(
+        qr = self._generador_qr.generar(self._contenido_qr(reserva))
+        self._servicio_email.enviar_confirmacion(
+            destinatario=reserva["email"], qr=qr, reserva=reserva
+        )
+
+    def _contenido_qr(self, reserva: dict) -> str:
+        return json.dumps(
             {
                 "codigo": reserva["codigo"],
                 "actividad": reserva["actividad_id"],
@@ -84,10 +90,6 @@ class InscripcionService:
                 ],
             },
             ensure_ascii=False,
-        )
-        qr = self._generador_qr.generar(contenido)
-        self._servicio_email.enviar_confirmacion(
-            destinatario=reserva["email"], qr=qr, reserva=reserva
         )
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
