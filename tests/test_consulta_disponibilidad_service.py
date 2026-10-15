@@ -20,7 +20,11 @@ class TestConsultaDisponibilidadService(unittest.TestCase):
     def test_debe_listar_un_turno_por_hora_con_el_cupo_de_la_actividad(self):
         # Arrange: el safari tiene 8 lugares y hay turnos de 9 a 17
         esperados = [
-            {"horario": datetime(2026, 10, 14, hora, 0), "cupos_disponibles": 8}
+            {
+                "horario": datetime(2026, 10, 14, hora, 0),
+                "cupos_disponibles": 8,
+                "inscripcion_abierta": True,
+            }
             for hora in range(9, 18)
         ]
 
@@ -56,3 +60,16 @@ class TestConsultaDisponibilidadService(unittest.TestCase):
         cupos = {h["horario"].hour: h["cupos_disponibles"] for h in horarios}
         self.assertEqual(cupos[10], 5)
         self.assertEqual(cupos[11], 8)
+
+    def test_debe_indicar_que_la_inscripcion_esta_cerrada_en_turnos_pasados_o_inminentes(self):
+        # Arrange: son las 10:50, el turno de las 11:00 empieza en 10 minutos
+        self.reloj.ahora.return_value = datetime(2026, 10, 14, 10, 50)
+
+        # Act
+        horarios = self.servicio.horarios("safari", MIERCOLES)
+
+        # Assert
+        abierta = {h["horario"].hour: h["inscripcion_abierta"] for h in horarios}
+        self.assertFalse(abierta[10])  # ya empezó
+        self.assertFalse(abierta[11])  # faltan menos de 15 minutos
+        self.assertTrue(abierta[12])   # faltan 1 hora y 10 minutos
