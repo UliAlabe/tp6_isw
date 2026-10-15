@@ -1,5 +1,8 @@
 from types import MappingProxyType
 
+from app.dominio.catalogo_actividades import existe_actividad
+from app.dominio.errores import ActividadInexistenteError
+
 _CLAUSULAS_POR_ACTIVIDAD = MappingProxyType(
     {
         "tirolesa": (
@@ -44,4 +47,6 @@ _CLAUSULAS_POR_ACTIVIDAD = MappingProxyType(
 
 
 def terminos_y_condiciones(actividad_id: str) -> str:
+    if not existe_actividad(actividad_id):
+        raise ActividadInexistenteError()
     return "\n".join(_CLAUSULAS_POR_ACTIVIDAD[actividad_id])
