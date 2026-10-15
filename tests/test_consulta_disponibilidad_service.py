@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock
 from datetime import date, datetime
 
 from app.dominio.catalogo_actividades import cupos_iniciales
@@ -12,7 +13,9 @@ MIERCOLES = date(2026, 10, 14)
 class TestConsultaDisponibilidadService(unittest.TestCase):
     def setUp(self):
         self.repositorio = RepositorioCuposEnMemoria(cupos_iniciales([MIERCOLES]))
-        self.servicio = ConsultaDisponibilidadService(self.repositorio)
+        self.reloj = MagicMock()
+        self.reloj.ahora.return_value = datetime(2026, 10, 14, 8, 0)
+        self.servicio = ConsultaDisponibilidadService(self.repositorio, self.reloj)
 
     def test_debe_listar_un_turno_por_hora_con_el_cupo_de_la_actividad(self):
         # Arrange: el safari tiene 8 lugares y hay turnos de 9 a 17

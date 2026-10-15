@@ -4,11 +4,13 @@ from app.dominio.calendario_parque import turnos_del_dia
 from app.dominio.catalogo_actividades import existe_actividad
 from app.dominio.errores import ActividadInexistenteError
 from app.repositorios.repositorio_cupos import RepositorioCupos
+from app.servicios.reloj import Reloj
 
 
 class ConsultaDisponibilidadService:
-    def __init__(self, repositorio_cupos: RepositorioCupos) -> None:
+    def __init__(self, repositorio_cupos: RepositorioCupos, reloj: Reloj) -> None:
         self._repositorio_cupos = repositorio_cupos
+        self._reloj = reloj
 
     def horarios(self, actividad_id: str, fecha: date) -> list[dict]:
         if not existe_actividad(actividad_id):
