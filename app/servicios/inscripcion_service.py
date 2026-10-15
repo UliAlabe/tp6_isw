@@ -1,4 +1,6 @@
+import json
 from datetime import datetime
+from uuid import uuid4
 
 from app.dominio.calendario_parque import es_turno_valido, esta_abierto
 from app.dominio.catalogo_actividades import edad_minima, requiere_talle
@@ -40,7 +42,7 @@ class InscripcionService:
         self._generador_qr = generador_qr
         self._reloj = reloj
 
-    def inscribir(self, datos: dict) -> None:
+    def inscribir(self, datos: dict) -> dict:
         actividad_id = datos["actividad_id"]
         horario = datos["horario"]
         cantidad_personas = datos["cantidad_personas"]
@@ -55,13 +57,40 @@ class InscripcionService:
         self._validar_datos_participantes(actividad_id, participantes)
         self._validar_dni_unicos(participantes)
         self._validar_superposicion(horario, participantes)
+        reserva = {
+            "codigo": self._generar_codigo_reserva(),
+            "actividad_id": actividad_id,
+            "horario": horario,
+            "email": datos["email"],
+            "participantes": participantes,
+        }
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
-        self._repositorio_inscripciones.guardar(datos)
-        self._enviar_confirmacion(actividad_id, horario, datos["email"])
+        self._repositorio_inscripciones.guardar({**datos, "codigo": reserva["codigo"]})
+        self._enviar_confirmacion(reserva)
+        return reserva
 
-    def _enviar_confirmacion(self, actividad_id: str, horario: datetime, email: str) -> None:
-        qr = self._generador_qr.generar(f"{actividad_id} {horario} {email}")
-        self._servicio_email.enviar_confirmacion(destinatario=email, qr=qr)
+    def _generar_codigo_reserva(self) -> str:
+        return uuid4().hex[:8].upper()
+
+    def _enviar_confirmacion(self, reserva: dict) -> None:
+        qr = self._generador_qr.generar(self._contenido_qr(reserva))
+        self._servicio_email.enviar_confirmacion(
+            destinatario=reserva["email"], qr=qr, reserva=reserva
+        )
+
+    def _contenido_qr(self, reserva: dict) -> str:
+        return json.dumps(
+            {
+                "codigo": reserva["codigo"],
+                "actividad": reserva["actividad_id"],
+                "horario": reserva["horario"].isoformat(),
+                "participantes": [
+                    {"nombre": p["nombre"], "dni": p["dni"]}
+                    for p in reserva["participantes"]
+                ],
+            },
+            ensure_ascii=False,
+        )
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
         if not acepta_terminos:

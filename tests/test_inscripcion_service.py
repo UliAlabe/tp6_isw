@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import MagicMock
 from datetime import datetime
@@ -553,6 +554,91 @@ class TestInscripcionService(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
+
+    def test_debe_devolver_una_reserva_con_codigo_al_inscribirse(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertTrue(reserva["codigo"])
+
+    def test_debe_generar_un_unico_qr_con_los_datos_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert: un QR por grupo, con el código, la actividad, el horario y los participantes
+        self.generador_qr.generar.assert_called_once()
+        contenido = json.loads(self.generador_qr.generar.call_args.args[0])
+        self.assertEqual(
+            contenido,
+            {
+                "codigo": reserva["codigo"],
+                "actividad": "tirolesa",
+                "horario": "2026-10-14T10:00:00",
+                "participantes": [
+                    {"nombre": "Ana Pérez", "dni": "30111222"},
+                    {"nombre": "Luis Gómez", "dni": "28555666"},
+                ],
+            },
+        )
+
+    def test_debe_enviar_en_el_email_el_resumen_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert: el email recibe la misma reserva que devuelve inscribir
+        resumen = self.servicio_email.enviar_confirmacion.call_args.kwargs["reserva"]
+        self.assertEqual(resumen, reserva)
+        self.assertEqual(
+            reserva,
+            {
+                "codigo": reserva["codigo"],
+                "actividad_id": "tirolesa",
+                "horario": HORARIO_10,
+                "email": "visitante@correo.com",
+                "participantes": datos["participantes"],
+            },
+        )
+
+    def test_debe_generar_codigos_de_reserva_distintos_para_inscripciones_distintas(self):
+        # Arrange: dos inscripciones en actividades y turnos distintos
+        primera = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+        segunda = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_11,
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni="28555666")],
+        )
+
+        # Act
+        reserva_1 = self.servicio.inscribir(primera)
+        reserva_2 = self.servicio.inscribir(segunda)
+
+        # Assert
+        self.assertNotEqual(reserva_1["codigo"], reserva_2["codigo"])
+
+    def test_debe_guardar_la_inscripcion_con_el_codigo_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert
+        inscripcion_guardada = self.repositorio_inscripciones.listar()[0]
+        self.assertEqual(inscripcion_guardada["codigo"], reserva["codigo"])
 
 if __name__ == "__main__":
     unittest.main()
