@@ -629,6 +629,17 @@ class TestInscripcionService(unittest.TestCase):
         # Assert
         self.assertNotEqual(reserva_1["codigo"], reserva_2["codigo"])
 
+    def test_debe_guardar_la_inscripcion_con_el_codigo_de_la_reserva(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert
+        inscripcion_guardada = self.repositorio_inscripciones.listar()[0]
+        self.assertEqual(inscripcion_guardada["codigo"], reserva["codigo"])
+
 if __name__ == "__main__":
     unittest.main()
     
