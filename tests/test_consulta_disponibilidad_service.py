@@ -41,3 +41,15 @@ class TestConsultaDisponibilidadService(unittest.TestCase):
         # Act y Assert: "bungee" no es una actividad del parque
         with self.assertRaises(ActividadInexistenteError):
             self.servicio.horarios("bungee", MIERCOLES)
+
+    def test_debe_reflejar_los_lugares_ocupados_por_una_inscripcion(self):
+        # Arrange: se ocupan 3 de los 8 lugares del safari de las 10:00
+        self.repositorio.descontar_cupo("safari", datetime(2026, 10, 14, 10, 0), 3)
+
+        # Act
+        horarios = self.servicio.horarios("safari", MIERCOLES)
+
+        # Assert: el turno de las 10:00 queda con 5 y el de las 11:00 sigue con 8
+        cupos = {h["horario"].hour: h["cupos_disponibles"] for h in horarios}
+        self.assertEqual(cupos[10], 5)
+        self.assertEqual(cupos[11], 8)
