@@ -2,6 +2,7 @@ import unittest
 from datetime import date, datetime
 
 from app.dominio.catalogo_actividades import cupos_iniciales
+from app.dominio.errores import ActividadInexistenteError
 from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
 from app.servicios.consulta_disponibilidad_service import ConsultaDisponibilidadService
 
@@ -35,3 +36,8 @@ class TestConsultaDisponibilidadService(unittest.TestCase):
 
         # Assert
         self.assertEqual(horarios, [])    
+
+    def test_debe_rechazar_la_consulta_de_una_actividad_que_no_existe(self):
+        # Act y Assert: "bungee" no es una actividad del parque
+        with self.assertRaises(ActividadInexistenteError):
+            self.servicio.horarios("bungee", MIERCOLES)
