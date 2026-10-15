@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from uuid import uuid4
 
@@ -59,14 +60,32 @@ class InscripcionService:
         codigo = self._generar_codigo_reserva()
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
         self._repositorio_inscripciones.guardar(datos)
-        self._enviar_confirmacion(actividad_id, horario, datos["email"])
+        self._enviar_confirmacion(codigo, actividad_id, horario, participantes, datos["email"])
         return {"codigo": codigo}
 
     def _generar_codigo_reserva(self) -> str:
         return uuid4().hex[:8].upper()
 
-    def _enviar_confirmacion(self, actividad_id: str, horario: datetime, email: str) -> None:
-        qr = self._generador_qr.generar(f"{actividad_id} {horario} {email}")
+    def _enviar_confirmacion(
+        self,
+        codigo: str,
+        actividad_id: str,
+        horario: datetime,
+        participantes: list[dict],
+        email: str,
+    ) -> None:
+        contenido = json.dumps(
+            {
+                "codigo": codigo,
+                "actividad": actividad_id,
+                "horario": horario.isoformat(),
+                "participantes": [
+                    {"nombre": p["nombre"], "dni": p["dni"]} for p in participantes
+                ],
+            },
+            ensure_ascii=False,
+        )
+        qr = self._generador_qr.generar(contenido)
         self._servicio_email.enviar_confirmacion(destinatario=email, qr=qr)
 
     def _validar_terminos(self, acepta_terminos: bool) -> None:
