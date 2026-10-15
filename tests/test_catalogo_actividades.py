@@ -1,7 +1,12 @@
 import unittest
 from datetime import date, datetime
 
-from app.dominio.catalogo_actividades import cupo_maximo, cupos_iniciales, existe_actividad
+from app.dominio.catalogo_actividades import (
+    cupo_maximo,
+    cupos_iniciales,
+    existe_actividad,
+    listar_actividades,
+)
 
 MIERCOLES = date(2026, 10, 14)
 
@@ -59,3 +64,42 @@ class TestCatalogoActividades(unittest.TestCase):
 
     def test_debe_rechazar_una_actividad_que_no_existe(self):
         self.assertFalse(existe_actividad("bungee"))
+
+    def test_debe_listar_las_actividades_con_sus_reglas(self):
+        # Arrange: el orden es el que muestra el front
+        esperadas = [
+            {
+                "id": "tirolesa",
+                "nombre": "Tirolesa",
+                "requiere_talle": True,
+                "edad_minima": 8,
+                "cupo_maximo": 10,
+            },
+            {
+                "id": "safari",
+                "nombre": "Safari",
+                "requiere_talle": False,
+                "edad_minima": 0,
+                "cupo_maximo": 8,
+            },
+            {
+                "id": "palestra",
+                "nombre": "Palestra",
+                "requiere_talle": True,
+                "edad_minima": 12,
+                "cupo_maximo": 12,
+            },
+            {
+                "id": "jardineria",
+                "nombre": "Jardinería",
+                "requiere_talle": False,
+                "edad_minima": 0,
+                "cupo_maximo": 12,
+            },
+        ]
+
+        # Act
+        actividades = listar_actividades()
+
+        # Assert
+        self.assertEqual(actividades, esperadas)
