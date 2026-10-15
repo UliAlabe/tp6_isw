@@ -554,6 +554,16 @@ class TestInscripcionService(unittest.TestCase):
         # Assert
         self.assertEqual(len(self.repositorio_inscripciones.listar()), 1)
 
+    def test_debe_devolver_una_reserva_con_codigo_al_inscribirse(self):
+        # Arrange
+        datos = self._datos_validos()
+
+        # Act
+        reserva = self.servicio.inscribir(datos)
+
+        # Assert
+        self.assertTrue(reserva["codigo"])
+
 if __name__ == "__main__":
     unittest.main()
     
