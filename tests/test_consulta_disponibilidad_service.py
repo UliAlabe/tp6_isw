@@ -25,4 +25,13 @@ class TestConsultaDisponibilidadService(unittest.TestCase):
 
         # Assert
         self.assertEqual(horarios, esperados)
-        
+
+    def test_debe_devolver_una_lista_vacia_cuando_el_parque_esta_cerrado(self):
+        # Arrange: los lunes el parque cierra
+        lunes = date(2026, 10, 19)
+
+        # Act
+        horarios = self.servicio.horarios("safari", lunes)
+
+        # Assert
+        self.assertEqual(horarios, [])    
