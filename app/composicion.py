@@ -23,6 +23,7 @@ RUTA_BASE_DE_DATOS_POR_DEFECTO = "parque.db"
 class Servicios:
     inscripcion: InscripcionService
     disponibilidad: ConsultaDisponibilidadService
+    reloj: Reloj
 
 
 def crear_servicio_email() -> ServicioEmail:
@@ -62,4 +63,5 @@ def crear_servicios(
             reloj,
         ),
         disponibilidad=ConsultaDisponibilidadService(repositorio_cupos, reloj),
+        reloj=reloj,
     )
