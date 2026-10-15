@@ -65,7 +65,7 @@ class InscripcionService:
             "participantes": participantes,
         }
         self._repositorio_cupos.descontar_cupo(actividad_id, horario, cantidad_personas)
-        self._repositorio_inscripciones.guardar(datos)
+        self._repositorio_inscripciones.guardar({**datos, "codigo": reserva["codigo"]})
         self._enviar_confirmacion(reserva)
         return reserva
 
