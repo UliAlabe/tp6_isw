@@ -30,3 +30,7 @@ def cupos_iniciales(fechas: list[date]) -> dict[tuple[str, datetime], int]:
         for turno in turnos_del_dia(fecha)
         for actividad_id, cupo in CUPO_MAXIMO_POR_ACTIVIDAD.items()
     }
+
+
+def existe_actividad(actividad_id: str) -> bool:
+    return actividad_id in CUPO_MAXIMO_POR_ACTIVIDAD

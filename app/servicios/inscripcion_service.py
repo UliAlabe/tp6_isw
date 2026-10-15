@@ -3,8 +3,9 @@ from datetime import datetime
 from uuid import uuid4
 
 from app.dominio.calendario_parque import es_turno_valido, esta_abierto
-from app.dominio.catalogo_actividades import edad_minima, requiere_talle
+from app.dominio.catalogo_actividades import edad_minima, existe_actividad, requiere_talle
 from app.dominio.errores import (
+    ActividadInexistenteError,
     DatosInvalidosError,
     FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
@@ -48,6 +49,7 @@ class InscripcionService:
         cantidad_personas = datos["cantidad_personas"]
         participantes = datos["participantes"]
 
+        self._validar_actividad(actividad_id)
         self._validar_terminos(datos["acepta_terminos"])
         self._validar_horario(actividad_id, horario)
         self._validar_ventana(horario)
@@ -144,3 +146,7 @@ class InscripcionService:
     def _validar_dni_unicos(self, participantes: list[dict]) -> None:
         if tiene_dni_repetido(participantes):
             raise DatosInvalidosError("Hay participantes con el mismo DNI")
+
+    def _validar_actividad(self, actividad_id: str) -> None:
+        if not existe_actividad(actividad_id):
+            raise ActividadInexistenteError()

@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime
 
-from app.dominio.catalogo_actividades import cupo_maximo, cupos_iniciales
+from app.dominio.catalogo_actividades import cupo_maximo, cupos_iniciales, existe_actividad
 
 MIERCOLES = date(2026, 10, 14)
 
@@ -51,3 +51,11 @@ class TestCatalogoActividades(unittest.TestCase):
         # Assert: 4 actividades x 9 turnos, todos del miércoles
         self.assertEqual(len(cupos), 36)
         self.assertTrue(all(turno.date() == MIERCOLES for _, turno in cupos))
+
+    def test_debe_reconocer_las_actividades_del_parque(self):
+        for actividad_id in ["safari", "palestra", "jardineria", "tirolesa"]:
+            with self.subTest(actividad=actividad_id):
+                self.assertTrue(existe_actividad(actividad_id))
+
+    def test_debe_rechazar_una_actividad_que_no_existe(self):
+        self.assertFalse(existe_actividad("bungee"))

@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 from datetime import datetime
 from app.dominio.errores import (
+    ActividadInexistenteError,
     DatosInvalidosError,
     FueraDeVentanaDeInscripcionError,
     HorarioNoDisponibleError,
@@ -639,6 +640,14 @@ class TestInscripcionService(unittest.TestCase):
         # Assert
         inscripcion_guardada = self.repositorio_inscripciones.listar()[0]
         self.assertEqual(inscripcion_guardada["codigo"], reserva["codigo"])
+
+    def test_debe_rechazar_la_inscripcion_cuando_la_actividad_no_existe(self):
+        # Arrange: "bungee" no es una actividad del parque
+        datos = self._datos_validos(actividad_id="bungee")
+
+        # Act y Assert
+        with self.assertRaises(ActividadInexistenteError):
+            self.servicio.inscribir(datos)
 
 if __name__ == "__main__":
     unittest.main()
