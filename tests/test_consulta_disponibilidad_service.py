@@ -1,0 +1,28 @@
+import unittest
+from datetime import date, datetime
+
+from app.dominio.catalogo_actividades import cupos_iniciales
+from app.repositorios.repositorio_cupos_en_memoria import RepositorioCuposEnMemoria
+from app.servicios.consulta_disponibilidad_service import ConsultaDisponibilidadService
+
+MIERCOLES = date(2026, 10, 14)
+
+
+class TestConsultaDisponibilidadService(unittest.TestCase):
+    def setUp(self):
+        self.repositorio = RepositorioCuposEnMemoria(cupos_iniciales([MIERCOLES]))
+        self.servicio = ConsultaDisponibilidadService(self.repositorio)
+
+    def test_debe_listar_un_turno_por_hora_con_el_cupo_de_la_actividad(self):
+        # Arrange: el safari tiene 8 lugares y hay turnos de 9 a 17
+        esperados = [
+            {"horario": datetime(2026, 10, 14, hora, 0), "cupos_disponibles": 8}
+            for hora in range(9, 18)
+        ]
+
+        # Act
+        horarios = self.servicio.horarios("safari", MIERCOLES)
+
+        # Assert
+        self.assertEqual(horarios, esperados)
+        
