@@ -609,6 +609,26 @@ class TestInscripcionService(unittest.TestCase):
             },
         )
 
+    def test_debe_generar_codigos_de_reserva_distintos_para_inscripciones_distintas(self):
+        # Arrange: dos inscripciones en actividades y turnos distintos
+        primera = self._datos_validos(
+            cantidad_personas=1,
+            participantes=[self._participante_valido()],
+        )
+        segunda = self._datos_validos(
+            actividad_id="safari",
+            horario=HORARIO_11,
+            cantidad_personas=1,
+            participantes=[self._participante_valido(dni="28555666")],
+        )
+
+        # Act
+        reserva_1 = self.servicio.inscribir(primera)
+        reserva_2 = self.servicio.inscribir(segunda)
+
+        # Assert
+        self.assertNotEqual(reserva_1["codigo"], reserva_2["codigo"])
+
 if __name__ == "__main__":
     unittest.main()
     
