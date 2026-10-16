@@ -3,8 +3,10 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from app.dominio.catalogo_actividades import cupos_iniciales
+from app.infraestructura.comprobantes_de_reserva import ComprobantesDeReserva
 from app.infraestructura.generador_qr_png import GeneradorQrPng
 from app.infraestructura.reloj_sistema import RelojSistema
+from app.infraestructura.servicio_email_con_comprobante import ServicioEmailConComprobante
 from app.infraestructura.servicio_email_consola import ServicioEmailConsola
 from app.infraestructura.servicio_email_smtp import ServicioEmailSmtp
 from app.repositorios.base_de_datos import BaseDeDatos
@@ -24,6 +26,7 @@ class Servicios:
     inscripcion: InscripcionService
     disponibilidad: ConsultaDisponibilidadService
     reloj: Reloj
+    comprobantes: ComprobantesDeReserva
 
 
 def crear_servicio_email() -> ServicioEmail:
@@ -54,14 +57,16 @@ def crear_servicios(
     hoy = reloj.ahora().date()
     fechas = [hoy + timedelta(days=dia) for dia in range(DIAS_DE_CUPOS_INICIALES)]
     repositorio_cupos.sembrar(cupos_iniciales(fechas))
+    comprobantes = ComprobantesDeReserva()
     return Servicios(
         inscripcion=InscripcionService(
             repositorio_cupos,
             RepositorioInscripcionesSqlite(base_de_datos),
-            servicio_email or crear_servicio_email(),
+            ServicioEmailConComprobante(servicio_email or crear_servicio_email(), comprobantes),
             GeneradorQrPng(),
             reloj,
         ),
         disponibilidad=ConsultaDisponibilidadService(repositorio_cupos, reloj),
         reloj=reloj,
+        comprobantes=comprobantes,
     )
