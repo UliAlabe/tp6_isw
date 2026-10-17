@@ -1,13 +1,29 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { crearInscripcion } from "../api/cliente.js";
 import { esErrorDeHorario, obtenerMensajeDeError } from "../utilidades/errores.js";
 import { formatearDia, formatearHora } from "../utilidades/fechas.js";
+import { USUARIO_LOGUEADO } from "../utilidades/sesion.js";
+import { hayErrores, validarInscripcion } from "../utilidades/validaciones.js";
+import MensajeCampo from "./MensajeCampo.jsx";
 import MensajeError from "./MensajeError.jsx";
 import ModalTerminos from "./ModalTerminos.jsx";
 import TarjetaParticipante from "./TarjetaParticipante.jsx";
 
 const PARTICIPANTE_VACIO = { nombre: "", dni: "", edad: "", talle: "" };
+const ERRORES_DE_PARTICIPANTE_VACIOS = { nombre: "", dni: "", edad: "", talle: "" };
+
+function crearErroresVacios(cantidadParticipantes) {
+  return {
+    email: "",
+    terminos: "",
+    participantes: Array(cantidadParticipantes).fill(ERRORES_DE_PARTICIPANTE_VACIOS),
+  };
+}
+
+function enfocarPrimerCampoConError(formulario) {
+  formulario?.querySelector('[aria-invalid="true"]')?.focus();
+}
 
 function convertirEdad(edad) {
   return edad.trim() === "" ? null : Number(edad);
@@ -60,26 +76,70 @@ function SelectorCantidad({ cantidad, maximo, alCambiar }) {
 }
 
 export default function FormularioInscripcion({ actividad, turno, alConfirmar, alFallarHorario }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(USUARIO_LOGUEADO.email);
   const [participantes, setParticipantes] = useState([PARTICIPANTE_VACIO]);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [hayModalAbierto, setHayModalAbierto] = useState(false);
   const [estaEnviando, setEstaEnviando] = useState(false);
   const [error, setError] = useState("");
+  const [errores, setErrores] = useState(crearErroresVacios(1));
+  const formulario = useRef(null);
 
-  const cambiarCantidad = (cantidad) =>
+  const limpiarError = (campo) => setErrores((actuales) => ({ ...actuales, [campo]: "" }));
+
+  const limpiarErrorDeParticipante = (indice, campo) =>
+    setErrores((actuales) => ({
+      ...actuales,
+      participantes: actuales.participantes.map((erroresDeParticipante, posicion) =>
+        posicion === indice ? { ...erroresDeParticipante, [campo]: "" } : erroresDeParticipante,
+      ),
+    }));
+
+  const cambiarEmail = (nuevoEmail) => {
+    setEmail(nuevoEmail);
+    limpiarError("email");
+  };
+
+  const cambiarAceptaTerminos = (acepta) => {
+    setAceptaTerminos(acepta);
+    limpiarError("terminos");
+  };
+
+  const cambiarCantidad = (cantidad) => {
     setParticipantes((actuales) =>
       Array.from({ length: cantidad }, (_, indice) => actuales[indice] ?? PARTICIPANTE_VACIO),
     );
+    setErrores((actuales) => ({
+      ...actuales,
+      participantes: Array.from(
+        { length: cantidad },
+        (_, indice) => actuales.participantes[indice] ?? ERRORES_DE_PARTICIPANTE_VACIOS,
+      ),
+    }));
+  };
 
-  const cambiarParticipante = (indice) => (participante) =>
+  const cambiarParticipante = (indice) => (participante, campo) => {
     setParticipantes((actuales) =>
       actuales.map((actual, posicion) => (posicion === indice ? participante : actual)),
     );
+    limpiarErrorDeParticipante(indice, campo);
+  };
 
   const enviar = async (evento) => {
     evento.preventDefault();
     setError("");
+    const erroresEncontrados = validarInscripcion({
+      email,
+      participantes,
+      aceptaTerminos,
+      actividad,
+    });
+    setErrores(erroresEncontrados);
+    if (hayErrores(erroresEncontrados)) {
+      // Se espera al próximo frame para que los campos ya tengan aria-invalid al buscarlos.
+      requestAnimationFrame(() => enfocarPrimerCampoConError(formulario.current));
+      return;
+    }
     setEstaEnviando(true);
     try {
       const inscripcion = armarInscripcion(actividad, turno, email, aceptaTerminos, participantes);
@@ -97,7 +157,7 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
   };
 
   return (
-    <form onSubmit={enviar} noValidate className="space-y-5">
+    <form ref={formulario} onSubmit={enviar} noValidate className="space-y-5">
       <div>
         <h2 className="text-xl font-black text-bosque">Completá la inscripción</h2>
         <p className="mt-1 text-sm">
@@ -112,12 +172,17 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
         <input
           type="email"
           value={email}
-          onChange={(evento) => setEmail(evento.target.value)}
+          onChange={(evento) => cambiarEmail(evento.target.value)}
           autoComplete="email"
           inputMode="email"
           placeholder="nombre@correo.com"
-          className="mt-1 block min-h-12 w-full rounded-xl border border-stone-300 bg-white px-3 text-base focus:border-hoja focus:outline-2 focus:outline-brote"
+          aria-invalid={Boolean(errores.email)}
+          aria-describedby={errores.email ? "error-email" : undefined}
+          className={`mt-1 block min-h-12 w-full rounded-xl border bg-white px-3 text-base focus:border-hoja focus:outline-2 focus:outline-brote ${
+            errores.email ? "border-alerta" : "border-stone-300"
+          }`}
         />
+        <MensajeCampo id="error-email" mensaje={errores.email} />
       </label>
 
       <div>
@@ -137,29 +202,39 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
           key={indice}
           numero={indice + 1}
           participante={participante}
+          errores={errores.participantes[indice]}
           requiereTalle={actividad.requiereTalle}
           alCambiar={cambiarParticipante(indice)}
         />
       ))}
 
-      <div className="flex items-start gap-3 rounded-2xl bg-white p-4 ring-1 ring-bosque/10">
-        <input
-          id="acepta-terminos"
-          type="checkbox"
-          checked={aceptaTerminos}
-          onChange={(evento) => setAceptaTerminos(evento.target.checked)}
-          className="mt-0.5 size-6 shrink-0 accent-bosque"
-        />
-        <label htmlFor="acepta-terminos" className="text-sm">
-          Leí y acepto los{" "}
-          <button
-            type="button"
-            onClick={() => setHayModalAbierto(true)}
-            className="font-bold text-bosque underline underline-offset-2"
-          >
-            términos y condiciones de {actividad.nombre}
-          </button>
-        </label>
+      <div
+        className={`rounded-2xl bg-white p-4 ring-1 ${
+          errores.terminos ? "ring-alerta" : "ring-bosque/10"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <input
+            id="acepta-terminos"
+            type="checkbox"
+            checked={aceptaTerminos}
+            onChange={(evento) => cambiarAceptaTerminos(evento.target.checked)}
+            aria-invalid={Boolean(errores.terminos)}
+            aria-describedby={errores.terminos ? "error-terminos" : undefined}
+            className="mt-0.5 size-6 shrink-0 accent-bosque"
+          />
+          <label htmlFor="acepta-terminos" className="text-sm">
+            Leí y acepto los{" "}
+            <button
+              type="button"
+              onClick={() => setHayModalAbierto(true)}
+              className="font-bold text-bosque underline underline-offset-2"
+            >
+              términos y condiciones de {actividad.nombre}
+            </button>
+          </label>
+        </div>
+        <MensajeCampo id="error-terminos" mensaje={errores.terminos} />
       </div>
 
       <button
@@ -175,7 +250,7 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
           actividad={actividad}
           alCerrar={() => setHayModalAbierto(false)}
           alAceptar={() => {
-            setAceptaTerminos(true);
+            cambiarAceptaTerminos(true);
             setHayModalAbierto(false);
           }}
         />
