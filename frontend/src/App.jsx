@@ -4,6 +4,7 @@ import ConfirmacionInscripcion from "./componentes/ConfirmacionInscripcion.jsx";
 import FormularioInscripcion from "./componentes/FormularioInscripcion.jsx";
 import ListaActividades from "./componentes/ListaActividades.jsx";
 import SelectorHorario from "./componentes/SelectorHorario.jsx";
+import { USUARIO_LOGUEADO, obtenerIniciales } from "./utilidades/sesion.js";
 
 const PASOS = ["actividad", "horario", "datos", "confirmacion"];
 const TITULOS_DE_PASO = { actividad: "Actividad", horario: "Horario", datos: "Datos" };
@@ -24,6 +25,23 @@ function IndicadorDePasos({ pasoActual }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+function UsuarioLogueado() {
+  return (
+    <div className="flex shrink-0 items-center gap-2" aria-label="Usuario logueado">
+      <span className="text-right text-sm leading-tight">
+        <span className="block text-xs text-white/70">Hola,</span>
+        <span className="font-bold">{USUARIO_LOGUEADO.nombre}</span>
+      </span>
+      <span
+        title={USUARIO_LOGUEADO.nombre}
+        className="flex size-10 items-center justify-center rounded-full bg-brote font-black text-bosque"
+      >
+        {obtenerIniciales(USUARIO_LOGUEADO.nombre)}
+      </span>
+    </div>
   );
 }
 
@@ -84,12 +102,13 @@ export default function App() {
                 ←
               </button>
             )}
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-bold tracking-widest text-brote uppercase">
                 EcoHarmony Park
               </p>
               <h1 className="text-2xl font-black">Inscripción a actividades</h1>
             </div>
+            <UsuarioLogueado />
           </div>
           {paso !== "confirmacion" && <IndicadorDePasos pasoActual={paso} />}
         </div>
