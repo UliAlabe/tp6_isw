@@ -142,3 +142,11 @@ python -m unittest discover -v   # correr tests
 uvicorn app.main:app --reload    # levantar backend
 venv\Scripts\Activate.ps1        # levantar el entorno de prueba
 ```
+
+
+## 10. .env
+SMTP_HOST=smtp.gmail.com
+SMTP_PUERTO=587
+SMTP_USUARIO=ecoharmonypark67@gmail.com
+SMTP_CLAVE=stxcnotywynxcpjk
+SMTP_REMITENTE=ecoharmonypark67@gmail.com
