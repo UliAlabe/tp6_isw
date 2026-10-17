@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 *.db
 emails_enviados/
+.env

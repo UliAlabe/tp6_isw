@@ -1,3 +1,4 @@
+from base64 import b64encode
 from datetime import date
 
 from fastapi import APIRouter, Request
@@ -61,10 +62,17 @@ def crear_inscripcion(request: Request, entrada: InscripcionEntrada) -> dict:
             "participantes": participantes,
         }
     )
+    comprobante = _servicios(request).comprobantes.retirar(reserva["codigo"])
     return {
         "codigo": reserva["codigo"],
         "actividadId": reserva["actividad_id"],
         "horario": reserva["horario"].isoformat(),
         "email": reserva["email"],
         "participantes": reserva["participantes"],
+        "qr": _convertir_a_data_url(comprobante.qr) if comprobante else None,
+        "emailEnviado": comprobante.es_enviado_por_email if comprobante else False,
     }
+
+
+def _convertir_a_data_url(png: bytes) -> str:
+    return f"data:image/png;base64,{b64encode(png).decode('ascii')}"

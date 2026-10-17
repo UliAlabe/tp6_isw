@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bosque: #386641;
+  --color-hoja: #6a994e;
+  --color-brote: #a7c957;
+  --color-crema: #f2e8cf;
+  --color-alerta: #bc4749;
+  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-crema text-stone-800 antialiased;
+}

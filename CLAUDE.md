@@ -19,7 +19,7 @@
 | Mocks | `unittest.mock` (viene con Python) |
 | Email | `smtplib` (Mailtrap en desarrollo) |
 | Código QR | `qrcode` |
-| Persistencia | En memoria (listas y diccionarios), sin base de datos |
+| Persistencia | SQLite (`sqlite3`, viene con Python); en los tests, repositorios en memoria |
 | Frontend | React |
 | Estilos | Tailwind CSS |
 
@@ -81,6 +81,7 @@ Ejemplo de `POST /api/inscripciones`:
   "horario": "2026-10-17T10:00:00-03:00",
   "email": "visitante@correo.com",
   "aceptaTerminos": true,
+  "cantidadPersonas": 1,
   "participantes": [
     { "nombre": "Ana Pérez", "dni": "30111222", "edad": 28, "talle": "M" }
   ]
@@ -96,8 +97,8 @@ Los errores siempre tienen el mismo formato:
 | Código | HTTP |
 |--------|------|
 | `DATOS_INVALIDOS`, `TERMINOS_NO_ACEPTADOS`, `TALLE_REQUERIDO` | 400 |
-| `ACTIVIDAD_NO_ENCONTRADA` | 404 |
-| `SIN_CUPO`, `HORARIO_NO_DISPONIBLE` | 409 |
+| `ACTIVIDAD_NO_ENCONTRADA` (`ActividadInexistenteError`) | 404 |
+| `SIN_CUPO`, `HORARIO_NO_DISPONIBLE`, `FUERA_DE_VENTANA`, `SUPERPOSICION_HORARIA` | 409 |
 
 ## 7. Tests unitarios (unittest)
 
@@ -141,3 +142,11 @@ python -m unittest discover -v   # correr tests
 uvicorn app.main:app --reload    # levantar backend
 venv\Scripts\Activate.ps1        # levantar el entorno de prueba
 ```
+
+
+## 10. .env
+SMTP_HOST=smtp.gmail.com
+SMTP_PUERTO=587
+SMTP_USUARIO=ecoharmonypark67@gmail.com
+SMTP_CLAVE=stxcnotywynxcpjk
+SMTP_REMITENTE=ecoharmonypark67@gmail.com
