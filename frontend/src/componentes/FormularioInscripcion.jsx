@@ -1,10 +1,19 @@
 import { useRef, useState } from "react";
 
 import { crearInscripcion } from "../api/cliente.js";
+import { obtenerDetallesVisuales } from "../utilidades/actividadesVisuales.js";
 import { esErrorDeHorario, obtenerMensajeDeError } from "../utilidades/errores.js";
 import { formatearDia, formatearHora } from "../utilidades/fechas.js";
 import { USUARIO_LOGUEADO } from "../utilidades/sesion.js";
 import { hayErrores, validarInscripcion } from "../utilidades/validaciones.js";
+import {
+  IconoCalendario,
+  IconoDocumento,
+  IconoHoja,
+  IconoMail,
+  IconoPersonas,
+  IconoReloj,
+} from "./Iconos.jsx";
 import MensajeCampo from "./MensajeCampo.jsx";
 import MensajeError from "./MensajeError.jsx";
 import ModalTerminos from "./ModalTerminos.jsx";
@@ -47,7 +56,8 @@ function armarInscripcion(actividad, turno, email, aceptaTerminos, participantes
 
 function SelectorCantidad({ cantidad, maximo, alCambiar }) {
   const estiloBoton =
-    "size-12 rounded-xl bg-white text-2xl font-black text-bosque ring-1 ring-bosque/20 disabled:opacity-40";
+    "flex size-11 items-center justify-center rounded-2xl bg-crema text-2xl font-black text-bosque transition hover:bg-brote/60 active:scale-90 disabled:opacity-30 disabled:pointer-events-none";
+
   return (
     <div className="flex items-center gap-4">
       <button
@@ -59,9 +69,14 @@ function SelectorCantidad({ cantidad, maximo, alCambiar }) {
       >
         −
       </button>
-      <span className="min-w-8 text-center text-2xl font-black" aria-live="polite">
-        {cantidad}
-      </span>
+      <div className="flex min-w-12 flex-col items-center justify-center">
+        <span className="text-2xl font-black text-bosque" aria-live="polite">
+          {cantidad}
+        </span>
+        <span className="text-[10px] font-bold text-stone-500 uppercase">
+          {cantidad === 1 ? "persona" : "personas"}
+        </span>
+      </div>
       <button
         type="button"
         className={estiloBoton}
@@ -84,6 +99,8 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
   const [error, setError] = useState("");
   const [errores, setErrores] = useState(crearErroresVacios(1));
   const formulario = useRef(null);
+
+  const visual = obtenerDetallesVisuales(actividad.id);
 
   const limpiarError = (campo) => setErrores((actuales) => ({ ...actuales, [campo]: "" }));
 
@@ -136,7 +153,6 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
     });
     setErrores(erroresEncontrados);
     if (hayErrores(erroresEncontrados)) {
-      // Se espera al próximo frame para que los campos ya tengan aria-invalid al buscarlos.
       requestAnimationFrame(() => enfocarPrimerCampoConError(formulario.current));
       return;
     }
@@ -157,63 +173,103 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
   };
 
   return (
-    <form ref={formulario} onSubmit={enviar} noValidate className="space-y-5">
-      <div>
-        <h2 className="text-xl font-black text-bosque">Completá la inscripción</h2>
-        <p className="mt-1 text-sm">
-          {actividad.nombre} · <span className="capitalize">{formatearDia(turno.horario)}</span> ·{" "}
-          {formatearHora(turno.horario)} hs
-        </p>
+    <form ref={formulario} onSubmit={enviar} noValidate className="space-y-6">
+      {/* Resumen superior elegante con foto */}
+      <div className="flex flex-col gap-4 overflow-hidden rounded-3xl bg-white p-4 shadow-sm ring-1 ring-bosque/10 sm:flex-row sm:items-center sm:p-5">
+        <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-2xl bg-stone-100 sm:w-28">
+          <img
+            src={visual.imagen}
+            alt={actividad.nombre}
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex-1 space-y-1">
+          <p className="text-xs font-black tracking-wider text-hoja uppercase">Completá los datos</p>
+          <h2 className="text-2xl font-black text-bosque">{actividad.nombre}</h2>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-stone-600">
+            <span className="flex items-center gap-1">
+              <IconoCalendario className="size-3.5 text-hoja" />
+              <span className="capitalize">{formatearDia(turno.horario)}</span>
+            </span>
+            <span>·</span>
+            <span className="flex items-center gap-1">
+              <IconoReloj className="size-3.5 text-hoja" />
+              {formatearHora(turno.horario)} hs
+            </span>
+          </div>
+        </div>
       </div>
+
       <MensajeError mensaje={error} />
 
-      <label className="block text-sm font-bold">
-        Email para recibir la confirmación
-        <input
-          type="email"
-          value={email}
-          onChange={(evento) => cambiarEmail(evento.target.value)}
-          autoComplete="email"
-          inputMode="email"
-          placeholder="nombre@correo.com"
-          aria-invalid={Boolean(errores.email)}
-          aria-describedby={errores.email ? "error-email" : undefined}
-          className={`mt-1 block min-h-12 w-full rounded-xl border bg-white px-3 text-base focus:border-hoja focus:outline-2 focus:outline-brote ${
-            errores.email ? "border-alerta" : "border-stone-300"
-          }`}
-        />
-        <MensajeCampo id="error-email" mensaje={errores.email} />
-      </label>
-
-      <div>
-        <p className="mb-2 text-sm font-bold">¿Cuántas personas participan?</p>
-        <SelectorCantidad
-          cantidad={participantes.length}
-          maximo={turno.cuposDisponibles}
-          alCambiar={cambiarCantidad}
-        />
-        <p className="mt-1 text-xs text-stone-500">
-          Quedan {turno.cuposDisponibles} lugares en este turno.
-        </p>
+      {/* Tarjeta de Correo Electrónico */}
+      <div className="rounded-3xl bg-white p-5 shadow-xs ring-1 ring-bosque/10">
+        <label className="block text-xs font-bold text-stone-700">
+          <span className="flex items-center gap-1.5 mb-1 text-sm font-black text-bosque">
+            <IconoMail className="size-4 text-hoja" />
+            Email para recibir el pase y confirmación
+          </span>
+          <p className="mb-2 text-xs font-normal text-stone-500">
+            Te enviaremos el comprobante oficial con código QR para ingresar a la actividad.
+          </p>
+          <input
+            type="email"
+            value={email}
+            onChange={(evento) => cambiarEmail(evento.target.value)}
+            autoComplete="email"
+            inputMode="email"
+            placeholder="visitante@correo.com"
+            aria-invalid={Boolean(errores.email)}
+            aria-describedby={errores.email ? "error-email" : undefined}
+            className={`mt-1 block min-h-12 w-full rounded-2xl border bg-white px-3.5 text-sm transition placeholder:text-stone-400 focus:border-hoja focus:outline-hidden focus:ring-3 focus:ring-brote/40 ${
+              errores.email ? "border-alerta ring-1 ring-alerta/50" : "border-stone-200"
+            }`}
+          />
+          <MensajeCampo id="error-email" mensaje={errores.email} />
+        </label>
       </div>
 
-      {participantes.map((participante, indice) => (
-        <TarjetaParticipante
-          key={indice}
-          numero={indice + 1}
-          participante={participante}
-          errores={errores.participantes[indice]}
-          requiereTalle={actividad.requiereTalle}
-          alCambiar={cambiarParticipante(indice)}
-        />
-      ))}
+      {/* Selector de cantidad de personas */}
+      <div className="rounded-3xl bg-white p-5 shadow-xs ring-1 ring-bosque/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="flex items-center gap-1.5 text-sm font-black text-bosque">
+              <IconoPersonas className="size-4 text-hoja" />
+              Cantidad de participantes
+            </span>
+            <p className="mt-0.5 text-xs text-stone-500">
+              Quedan <strong className="text-bosque">{turno.cuposDisponibles} lugares</strong> en este turno.
+            </p>
+          </div>
+          <SelectorCantidad
+            cantidad={participantes.length}
+            maximo={turno.cuposDisponibles}
+            alCambiar={cambiarCantidad}
+          />
+        </div>
+      </div>
 
+      {/* Participantes */}
+      <div className="space-y-4">
+        {participantes.map((participante, indice) => (
+          <TarjetaParticipante
+            key={indice}
+            numero={indice + 1}
+            participante={participante}
+            errores={errores.participantes[indice]}
+            requiereTalle={actividad.requiereTalle}
+            alCambiar={cambiarParticipante(indice)}
+          />
+        ))}
+      </div>
+
+      {/* Términos y condiciones */}
       <div
-        className={`rounded-2xl bg-white p-4 ring-1 ${
-          errores.terminos ? "ring-alerta" : "ring-bosque/10"
+        className={`rounded-3xl bg-white p-5 shadow-xs ring-1 transition-all ${
+          errores.terminos ? "ring-2 ring-alerta" : "ring-bosque/10"
         }`}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3.5">
           <input
             id="acepta-terminos"
             type="checkbox"
@@ -221,28 +277,40 @@ export default function FormularioInscripcion({ actividad, turno, alConfirmar, a
             onChange={(evento) => cambiarAceptaTerminos(evento.target.checked)}
             aria-invalid={Boolean(errores.terminos)}
             aria-describedby={errores.terminos ? "error-terminos" : undefined}
-            className="mt-0.5 size-6 shrink-0 accent-bosque"
+            className="mt-1 size-5 shrink-0 rounded-lg accent-bosque cursor-pointer"
           />
-          <label htmlFor="acepta-terminos" className="text-sm">
-            Leí y acepto los{" "}
+          <label htmlFor="acepta-terminos" className="text-xs leading-relaxed text-stone-700 cursor-pointer">
+            He leído y acepto el{" "}
             <button
               type="button"
               onClick={() => setHayModalAbierto(true)}
-              className="font-bold text-bosque underline underline-offset-2"
+              className="font-bold text-bosque underline underline-offset-3 hover:text-hoja"
             >
-              términos y condiciones de {actividad.nombre}
+              reglamento de seguridad y términos de {actividad.nombre}
             </button>
+            , comprometiéndome a respetar las pautas de cuidado ambiental del parque.
           </label>
         </div>
         <MensajeCampo id="error-terminos" mensaje={errores.terminos} />
       </div>
 
+      {/* Botón principal */}
       <button
         type="submit"
         disabled={estaEnviando}
-        className="min-h-14 w-full rounded-2xl bg-bosque text-lg font-black text-white shadow-md transition active:scale-[0.99] disabled:opacity-60"
+        className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-bosque px-6 text-base font-black text-white shadow-md transition-all hover:bg-hoja active:scale-[0.99] disabled:opacity-60 cursor-pointer"
       >
-        {estaEnviando ? "Inscribiendo…" : "Confirmar inscripción"}
+        {estaEnviando ? (
+          <>
+            <span className="size-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            <span>Confirmando reserva…</span>
+          </>
+        ) : (
+          <>
+            <IconoHoja className="size-5 text-brote" />
+            <span>Confirmar inscripción</span>
+          </>
+        )}
       </button>
 
       {hayModalAbierto && (

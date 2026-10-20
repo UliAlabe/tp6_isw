@@ -1,8 +1,16 @@
+import { IconoHoja } from "./Iconos.jsx";
+
 export default function Cargando({ texto = "Cargando…" }) {
   return (
-    <p className="flex items-center justify-center gap-3 py-10 text-hoja" aria-live="polite">
-      <span className="size-5 animate-spin rounded-full border-2 border-brote border-t-bosque" />
-      {texto}
-    </p>
+    <div
+      className="flex flex-col items-center justify-center gap-3 py-12 text-center"
+      aria-live="polite"
+    >
+      <div className="relative flex size-12 items-center justify-center">
+        <span className="absolute size-12 animate-spin rounded-full border-3 border-hoja/20 border-t-bosque" />
+        <IconoHoja className="size-6 text-hoja animate-pulse" />
+      </div>
+      <p className="text-sm font-bold text-bosque/80">{texto}</p>
+    </div>
   );
 }
