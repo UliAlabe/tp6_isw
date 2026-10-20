@@ -30,7 +30,6 @@ export default function TarjetaParticipante({
     alCambiar({ ...participante, [campo]: evento.target.value }, campo);
 
   const idDeError = (campo) => `error-participante-${numero}-${campo}`;
-  const esTitular = numero === 1;
 
   return (
     <fieldset className="rounded-3xl bg-white p-5 shadow-xs ring-1 ring-bosque/10 transition-all">
@@ -42,15 +41,10 @@ export default function TarjetaParticipante({
             {numero}
           </div>
           <div>
-            <p className="text-sm font-black text-bosque">
-              Participante {numero} {esTitular && <span className="text-xs font-normal text-stone-500">(Titular)</span>}
-            </p>
-            <p className="text-[11px] text-stone-400">Datos para el seguro y acceso al sendero</p>
+            <p className="text-sm font-black text-bosque">Participante {numero}</p>
+            <p className="text-[11px] text-stone-400">Datos para el seguro y acceso a la actividad</p>
           </div>
         </div>
-        <span className="rounded-full bg-crema/70 px-2.5 py-0.5 text-[11px] font-bold text-hoja">
-          Visitante
-        </span>
       </div>
 
       <div className="grid gap-3.5 sm:grid-cols-2">
